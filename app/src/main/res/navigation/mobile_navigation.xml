@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_gallery"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.gallery.GalleryFragment"
+        android:label="@string/menu_gallery"
+        tools:layout="@layout/fragment_gallery" />
+
+    <fragment
+        android:id="@+id/nav_slideshow"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.slideshow.SlideshowFragment"
+        android:label="@string/menu_slideshow"
+        tools:layout="@layout/fragment_slideshow" />
+    <fragment
+        android:id="@+id/nav_rewards"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.services.ServicesFragment"
+        android:label="Services"
+        tools:layout="@layout/fragment_services" />
+    <fragment
+        android:id="@+id/nav_ai"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.aigenerate.CVGeneratorFragment"
+        android:label="@string/menu_aiServices"
+        tools:layout="@layout/fragment_cv_generator" />
+    <fragment
+        android:id="@+id/nav_jobs"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.jobs.JobsListFragment"
+        android:label="@string/menu_jobs"
+        tools:layout="@layout/fragment_jobs_list">
+
+        <argument
+            android:name="job_id"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_post_job"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.postjob.PostJobFragment"
+        android:label="Post a Job"
+        tools:layout="@layout/fragment_post_job" />
+
+    <fragment
+        android:id="@+id/nav_saved_jobs"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.savedjobs.SavedJobsFragment"
+        android:label="Saved Jobs"
+        tools:layout="@layout/fragment_saved_jobs" />
+
+    <fragment
+        android:id="@+id/nav_email_alerts"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.EmailJobAlertsFragment"
+        android:label="Email Alerts"
+        tools:layout="@layout/fragment_email_job_alerts" />
+
+    <fragment
+        android:id="@+id/nav_phone_alerts"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.PhoneJobAlertsFragment"
+        android:label="Phone Alerts"
+        tools:layout="@layout/fragment_phone_job_alerts" />
+
+    <fragment
+        android:id="@+id/nav_priority_job"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.PriorityJobFragment"
+        android:label="Priority Job"
+        tools:layout="@layout/fragment_priority_job" />
+
+    <fragment
+        android:id="@+id/nav_cv_review"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.CVReviewFragment"
+        android:label="CV Review"
+        tools:layout="@layout/fragment_cv_review" />
+
+    <fragment
+        android:id="@+id/nav_cv_write"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.CVWriteFragment"
+        android:label="CV Write"
+        tools:layout="@layout/fragment_cv_write" />
+
+    <fragment
+        android:id="@+id/nav_career_coaching"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.CareerCoachingFragment"
+        android:label="Career Coaching"
+        tools:layout="@layout/fragment_career_coaching" />
+</navigation>

@@ -1,0 +1,379 @@
+package com.solutions.alphil.zambiajobalerts;
+
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.navigation.NavigationView;
+
+import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import com.google.android.play.core.review.ReviewException;
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
+import com.google.android.play.core.review.model.ReviewErrorCode;
+import com.solutions.alphil.zambiajobalerts.classes.JobDetailsBottomSheet;
+import com.solutions.alphil.zambiajobalerts.databinding.ActivityMainBinding;
+import com.solutions.alphil.zambiajobalerts.ui.aigenerate.CVGeneratorFragment;
+import com.solutions.alphil.zambiajobalerts.ui.jobs.JobsListFragment;
+import com.solutions.alphil.zambiajobalerts.ui.home.HomeFragment;
+import com.solutions.alphil.zambiajobalerts.ui.gallery.GalleryFragment;
+import com.solutions.alphil.zambiajobalerts.ui.postjob.PostJobFragment;
+import com.solutions.alphil.zambiajobalerts.ui.savedjobs.SavedJobsFragment;
+import com.solutions.alphil.zambiajobalerts.ui.savedjobs.SavedJobsReminderWorker;
+import com.solutions.alphil.zambiajobalerts.ui.services.ServicesFragment;
+import com.solutions.alphil.zambiajobalerts.ui.slideshow.SlideshowFragment;
+
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
+public class MainActivity extends AppCompatActivity {
+
+    private AppBarConfiguration mAppBarConfiguration;
+    private ActivityMainBinding binding;
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
+    private static final String CHANNEL_ID = "job_alerts_channel";
+    private static final String PREFS_NAME = "app_prefs";
+    private static final String NOTIFICATION_PERMISSION_ASKED = "notification_permission_asked";
+    private NavController navController;
+    private SharedPreferences prefs;
+    private InterstitialAd interstitialAd;
+    private static final String AD_UNIT_ID = "ca-app-pub-2168080105757285/4046795138";
+    private static final String PREFS_NAMEC = "app_prefs";
+    private static final String KEY_APP_OPENS = "app_opens";
+    private RewardedAd rewardedAd;
+    private static final String TEST_AD_UNIT_ID_REWARDED = "ca-app-pub-3940256099942544/5224354917";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (!isNetworkAvailable()) {
+            Toast.makeText(this, "You are not connected to the internet", Toast.LENGTH_SHORT).show();
+            System.exit(0);
+        }
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        prefs = getSharedPreferences(PREFS_NAMEC, Context.MODE_PRIVATE);
+
+        ReviewManager manager = ReviewManagerFactory.create(this);
+        Task<ReviewInfo> request = manager.requestReviewFlow();
+        request.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                ReviewInfo reviewInfo = task.getResult();
+            }
+        });
+
+        if (savedInstanceState == null) {
+            int openCount = prefs.getInt(KEY_APP_OPENS, 0) + 1;
+            prefs.edit().putInt(KEY_APP_OPENS, openCount).apply();
+            if (openCount % 5 == 0) {
+                loadAndShowInterstitialAd();
+            }
+        }
+        setSupportActionBar(binding.appBarMain.toolbar);
+        binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (navController != null) {
+                    navController.navigate(R.id.nav_post_job);
+                } else {
+                    loadFragment(new PostJobFragment(), "PostJob");
+                }
+            }
+        });
+
+        DrawerLayout drawer = binding.drawerLayout;
+        NavigationView navigationView = binding.navView;
+
+        initializeNavigation(drawer, navigationView);
+
+        createNotificationChannel();
+        setupHamburgerMenu();
+        checkNotificationPermission();
+
+        handleNotificationIntent(getIntent());
+        handleDeepLink(getIntent());
+        
+        scheduleSavedJobsReminder();
+
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                    setEnabled(true);
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleDeepLink(intent);
+    }
+
+    private void scheduleSavedJobsReminder() {
+        PeriodicWorkRequest reminderRequest = new PeriodicWorkRequest.Builder(
+                SavedJobsReminderWorker.class,
+                6, TimeUnit.HOURS, // Remind every 6 hours
+                1, TimeUnit.HOURS
+        ).build();
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "SavedJobsReminder",
+                ExistingPeriodicWorkPolicy.REPLACE, // Ensure interval update
+                reminderRequest
+        );
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            return activeNetwork != null && activeNetwork.isConnected();
+        }
+        return false;
+    }
+
+    private void handleDeepLink(Intent intent) {
+        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
+            Uri data = intent.getData();
+            String path = data.getPath();
+
+            if (path != null && path.startsWith("/job/")) {
+                String identifier = path.substring("/job/".length()).replaceAll("/", "");
+                if (!identifier.isEmpty()) {
+                    // MAX REVENUE: Load Rewards (Ad) first, then open job details
+                    loadRewardsThenJob(identifier);
+                }
+            }
+        }
+    }
+
+    private void loadRewardsThenJob(String identifier) {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        RewardedAd.load(this, TEST_AD_UNIT_ID_REWARDED, adRequest,
+                new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull RewardedAd ad) {
+                        ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                            @Override
+                            public void onAdDismissedFullScreenContent() {
+                                navigateToJobDetails(identifier);
+                            }
+
+                            @Override
+                            public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                navigateToJobDetails(identifier);
+                            }
+                        });
+                        ad.show(MainActivity.this, rewardItem -> {});
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        navigateToJobDetails(identifier);
+                    }
+                });
+    }
+
+    private void navigateToJobDetails(String identifier) {
+        try {
+            int jobId = Integer.parseInt(identifier);
+            JobDetailsBottomSheet.newInstance(jobId)
+                    .show(getSupportFragmentManager(), "JobDetails");
+        } catch (NumberFormatException e) {
+            JobDetailsBottomSheet.newInstance(identifier)
+                    .show(getSupportFragmentManager(), "JobDetails");
+        }
+    }
+
+    private void loadAndShowInterstitialAd() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        InterstitialAd.load(this, AD_UNIT_ID, adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(InterstitialAd ad) {
+                        interstitialAd = ad;
+                        if (!isFinishing() && !isDestroyed()) {
+                            interstitialAd.show(MainActivity.this);
+                        }
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError loadAdError) {
+                        interstitialAd = null;
+                    }
+                });
+    }
+
+    private void initializeNavigation(DrawerLayout drawer, NavigationView navigationView) {
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_home, R.id.nav_jobs, R.id.nav_gallery, R.id.nav_post_job, R.id.nav_rewards, R.id.nav_saved_jobs, R.id.nav_slideshow, R.id.nav_ai)
+                .setOpenableLayout(drawer)
+                .build();
+
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment_content_main);
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
+            NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+            NavigationUI.setupWithNavController(navigationView, navController);
+        }
+    }
+
+    private void setupHamburgerMenu() {
+        binding.appBarMain.toolbar.setNavigationOnClickListener(v -> binding.drawerLayout.open());
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+
+    private void handleNotificationIntent(Intent intent) {
+        if (intent != null && intent.hasExtra("open_job_id")) {
+            int jobId = intent.getIntExtra("open_job_id", -1);
+            if (jobId != -1) {
+                navigateToJobDetails(String.valueOf(jobId));
+            }
+        }
+    }
+
+    private void loadFragment(Fragment fragment, String tag) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.nav_host_fragment_content_main, fragment, tag);
+        transaction.addToBackStack(tag);
+        transaction.commit();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem notificationItem = menu.findItem(R.id.action_notifications);
+        if (notificationItem != null) {
+            boolean enabled = prefs.getBoolean("notifications_enabled", true);
+            notificationItem.setIcon(enabled ? R.drawable.ic_notifications_on : R.drawable.ic_notifications_off);
+            notificationItem.setTitle(enabled ? "Disable Notifications" : "Enable Notifications");
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_notifications) {
+            boolean currentState = prefs.getBoolean("notifications_enabled", true);
+            prefs.edit().putBoolean("notifications_enabled", !currentState).apply();
+            if (!currentState) {
+                checkNotificationPermission();
+            }
+            invalidateOptionsMenu();
+            Toast.makeText(this, !currentState ? "Notifications Enabled" : "Notifications Muted", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.action_settings) {
+            if (navController != null) {
+                navController.navigate(R.id.nav_jobs);
+            }
+            return true;
+        } else if (id == R.id.action_notification_settings) {
+            Intent intent = new Intent();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+            } else {
+                intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+                intent.putExtra("app_package", getPackageName());
+                intent.putExtra("app_uid", getApplicationInfo().uid);
+            }
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_share) {
+            shareApp();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void shareApp() {
+        String playStoreUrl = "https://play.google.com/store/apps/details?id=com.solutions.alphil.zambiajobalerts";
+        String shareText = "Check out Zambia Job Alerts app for the latest job opportunities in Zambia! Download now: " + playStoreUrl;
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+        startActivity(Intent.createChooser(shareIntent, "Share Zambia Job Alerts via"));
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        return (navController != null && NavigationUI.navigateUp(navController, mAppBarConfiguration))
+                || super.onSupportNavigateUp();
+    }
+}
