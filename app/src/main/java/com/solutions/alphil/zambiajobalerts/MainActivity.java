@@ -141,16 +141,6 @@ public class MainActivity extends AppCompatActivity {
         handleDeepLink(getIntent());
         
         scheduleSavedJobsReminder();
-
-        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
-                    setEnabled(true);
-            }
-        };
-        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @Override
