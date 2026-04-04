@@ -12,7 +12,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 public class AdManager {
     private static final String TAG = "AdManager";
-    private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"; // Test ID
+    private static final String INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-2168080105757285/4046795138"; // Test ID
 
     private InterstitialAd mInterstitialAd;
     private static AdManager instance;

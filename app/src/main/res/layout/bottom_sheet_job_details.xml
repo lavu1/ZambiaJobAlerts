@@ -40,6 +40,7 @@
                     android:layout_height="48dp"
                     android:layout_alignParentEnd="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/save"
                     android:src="@drawable/ic_bookmark_border"
                     app:tint="?attr/colorPrimary" />
 

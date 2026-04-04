@@ -1,5 +1,10 @@
 package com.solutions.alphil.zambiajobalerts.classes;
 
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -173,15 +178,8 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
 
     private void setupClickListeners() {
         binding.btnApply.setOnClickListener(v -> {
-            if (currentJob != null && currentJob.getApplication() != null && !currentJob.getApplication().isEmpty()) {
-                try {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(currentJob.getApplication()));
-                    startActivity(browserIntent);
-                } catch (Exception e) {
-                    Toast.makeText(getContext(), "Could not open application link", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getContext(), "Application link not available", Toast.LENGTH_SHORT).show();
+            if (currentJob != null) {
+                applyForJob(currentJob);
             }
         });
 
@@ -205,6 +203,65 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
                 updateSaveButtonState(currentJob.getId());
             }
         });
+    }
+
+    private void applyForJob(Job job) {
+        String application = job.getApplication();
+        if (application != null && !application.isEmpty()) {
+            String cleanApp = application.trim();
+
+            if (cleanApp.contains("@") && cleanApp.contains(".")) {
+                // Treat as email
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse("mailto:" + cleanApp));
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Job Application: " + job.getTitle());
+                intent.putExtra(Intent.EXTRA_TEXT, createEmailBody(job));
+
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    offerEmailCopy(cleanApp);
+                }
+            } else if (cleanApp.startsWith("http://") || cleanApp.startsWith("https://")) {
+                // Treat as URL
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(cleanApp));
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    offerEmailCopy(cleanApp);
+                }
+            } else {
+                offerEmailCopy(cleanApp);
+            }
+        } else {
+            Toast.makeText(getContext(), "Application link not available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void offerEmailCopy(String email) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Application Method")
+                .setMessage("Would you like to copy the application details to your clipboard?")
+                .setPositiveButton("Copy", (dialog, which) -> {
+                    ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("Job Application", email);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(getContext(), "Copied: " + email, Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private String createEmailBody(Job job) {
+        return "Dear Hiring Manager,\n\n" +
+                "I am writing to apply for the position of " + job.getTitle() +
+                " that I found through Zambia Job Alerts.\n\n" +
+                "Please find my application materials attached.\n\n" +
+                "Thank you for your consideration.\n\n" +
+                "Sincerely,\n" +
+                "[Your Name]\n" +
+                "[Your Phone Number]\n" +
+                "[Your Email Address]";
     }
 
     private void updateSaveButtonState(int jobId) {

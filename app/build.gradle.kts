@@ -12,8 +12,8 @@ android {
         applicationId = "com.solutions.alphil.zambiajobalerts"
         minSdk = 28
         targetSdk = 36
-        versionCode = 12
-        versionName = "1.2.11.05"
+        versionCode = 15
+        versionName = "1.2.11.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

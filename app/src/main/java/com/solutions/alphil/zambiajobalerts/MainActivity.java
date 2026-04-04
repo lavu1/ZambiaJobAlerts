@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAMEC = "app_prefs";
     private static final String KEY_APP_OPENS = "app_opens";
     private RewardedAd rewardedAd;
-    private static final String TEST_AD_UNIT_ID_REWARDED = "ca-app-pub-3940256099942544/5224354917";
+    private static final String TEST_AD_UNIT_ID_REWARDED = "ca-app-pub-2168080105757285/1720477714";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadRewardsThenJob(String identifier) {
+        Toast.makeText(this, "Loading Job details after the ad please wait!!!", Toast.LENGTH_LONG).show();
         AdRequest adRequest = new AdRequest.Builder().build();
         RewardedAd.load(this, TEST_AD_UNIT_ID_REWARDED, adRequest,
                 new RewardedAdLoadCallback() {
