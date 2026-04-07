@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "job_alerts_channel";
     private static final String PREFS_NAME = "app_prefs";
     private static final String NOTIFICATION_PERMISSION_ASKED = "notification_permission_asked";
+    private static final String KEY_NOTIFICATION_DENIED = "notification_denied";
+    private static final String KEY_NOTIFICATION_GRANTED = "notification_granted";
     private NavController navController;
     private SharedPreferences prefs;
     private InterstitialAd interstitialAd;
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        prefs = getSharedPreferences(PREFS_NAMEC, Context.MODE_PRIVATE);
+        prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
         ReviewManager manager = ReviewManagerFactory.create(this);
         Task<ReviewInfo> request = manager.requestReviewFlow();
@@ -139,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
 
         handleNotificationIntent(getIntent());
         handleDeepLink(getIntent());
-        
+        checkNotificationPermission();
         scheduleSavedJobsReminder();
     }
 
@@ -148,6 +150,32 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         handleDeepLink(intent);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                prefs.edit()
+                        .putBoolean(KEY_NOTIFICATION_GRANTED, true)
+                        .putBoolean(KEY_NOTIFICATION_DENIED, false)
+                        .apply();
+
+                Toast.makeText(this, "Notifications enabled", Toast.LENGTH_SHORT).show();
+
+            } else {
+                prefs.edit()
+                        .putBoolean(KEY_NOTIFICATION_GRANTED, false)
+                        .putBoolean(KEY_NOTIFICATION_DENIED, true)
+                        .apply();
+
+                Toast.makeText(this, "Notifications are disabled. You may be asked again next time you open the app.", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void scheduleSavedJobsReminder() {
@@ -275,14 +303,51 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
     }
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED) {
 
+                prefs.edit()
+                        .putBoolean(KEY_NOTIFICATION_GRANTED, true)
+                        .putBoolean(KEY_NOTIFICATION_DENIED, false)
+                        .apply();
+                return;
+            }
+
+            boolean deniedBefore = prefs.getBoolean(KEY_NOTIFICATION_DENIED, false);
+
+            if (deniedBefore && ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.POST_NOTIFICATIONS)) {
+
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle("Enable Notifications")
+                        .setMessage("Please allow notifications so you can receive the latest job alerts.")
+                        .setPositiveButton("Allow", (dialog, which) -> ActivityCompat.requestPermissions(
+                                MainActivity.this,
+                                new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                                NOTIFICATION_PERMISSION_REQUEST_CODE
+                        ))
+                        .setNegativeButton("Not Now", null)
+                        .show();
+
+            } else {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_PERMISSION_REQUEST_CODE
+                );
+            }
+        }
+    }
+/*
     private void checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST_CODE);
             }
         }
-    }
+    }*/
 
     private void handleNotificationIntent(Intent intent) {
         if (intent != null && intent.hasExtra("open_job_id")) {
