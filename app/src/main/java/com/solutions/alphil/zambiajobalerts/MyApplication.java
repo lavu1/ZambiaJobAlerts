@@ -15,6 +15,8 @@ import com.solutions.alphil.zambiajobalerts.classes.RefreshDataWorker;
 import java.util.concurrent.TimeUnit;
 
 public class MyApplication extends Application {
+    private static AppOpenManager appOpenManager;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -23,6 +25,8 @@ public class MyApplication extends Application {
             // Pre-cache ads after initialization
             AdManager.getInstance().loadInterstitialAd(this);
         });
+
+        appOpenManager = new AppOpenManager(this);
 
         // Schedule periodic background sync
         scheduleJobSync();

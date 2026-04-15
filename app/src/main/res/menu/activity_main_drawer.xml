@@ -36,6 +36,10 @@
             android:id="@+id/nav_rewards"
             android:icon="@drawable/ic_news_posts"
             android:title="@string/menu_rewards" />
+        <item
+            android:id="@+id/nav_terms"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_terms" />
 
     </group>
 </menu>

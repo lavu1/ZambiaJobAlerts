@@ -13,8 +13,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -23,7 +23,6 @@ import com.solutions.alphil.zambiajobalerts.classes.Job;
 import com.solutions.alphil.zambiajobalerts.classes.JobDetailsBottomSheet;
 import com.solutions.alphil.zambiajobalerts.classes.JobsAdapter;
 import com.solutions.alphil.zambiajobalerts.databinding.FragmentHomeBinding;
-import com.solutions.alphil.zambiajobalerts.ui.jobs.JobsListFragment;
 import com.solutions.alphil.zambiajobalerts.ui.jobs.JobsViewModel;
 
 import java.util.ArrayList;
@@ -48,19 +47,24 @@ public class HomeFragment extends Fragment {
         setupObservers();
         MobileAds.initialize(requireContext());
 
+        // Top Banner - Standard
         AdView adViewTop = binding.adViewhometop;
         AdRequest adRequests = new AdRequest.Builder().build();
         adViewTop.loadAd(adRequests);
 
+        // Bottom Banner - COLLAPSIBLE
         AdView adView = binding.adViewhome;
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
+        Bundle extras = new Bundle();
+        extras.putString("collapsible", "bottom"); // Makes the ad expand from the bottom
+        AdRequest adRequestCollapsible = new AdRequest.Builder()
+                .addNetworkExtrasBundle(AdMobAdapter.class, extras)
+                .build();
+        adView.loadAd(adRequestCollapsible);
 
         return root;
     }
 
     private void initViews() {
-        // Set the welcome text
         binding.tvWelcome.setText(
                 "Welcome to Zambia Job Alerts – Your Gateway to Employment!\n\n" +
                         "Finding a job shouldn't be stressful. Whether you're a fresh graduate, a skilled professional, or looking for your next big career move, we connect you with real opportunities in Zambia.\n\n" +
@@ -78,7 +82,6 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.nav_jobs);
         });
 
-        // Setup refresh button
         binding.btnRefresh.setOnClickListener(v -> {
             refreshJobs();
         });
@@ -89,8 +92,6 @@ public class HomeFragment extends Fragment {
                 this,
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())
         ).get(JobsViewModel.class);
-
-        // Load initial jobs
         refreshJobs();
     }
 
@@ -108,7 +109,6 @@ public class HomeFragment extends Fragment {
             binding.pbLoadings.setVisibility(View.GONE);
 
             if (jobs != null && !jobs.isEmpty()) {
-                // Show only first 3 jobs
                 List<Job> featuredJobs = jobs.subList(0, Math.min(3, jobs.size()));
                 adapter.updateDisplayList(new ArrayList<>(featuredJobs));
                 binding.rvFeaturedJobs.setVisibility(View.VISIBLE);
@@ -137,7 +137,6 @@ public class HomeFragment extends Fragment {
             binding.pbLoadings.setVisibility(View.GONE);
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-                // Show refresh button on error
                 binding.layoutNoJobs.setVisibility(View.VISIBLE);
                 binding.btnRefresh.setVisibility(View.VISIBLE);
             }

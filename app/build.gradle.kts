@@ -12,8 +12,8 @@ android {
         applicationId = "com.solutions.alphil.zambiajobalerts"
         minSdk = 28
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.2.11.16"
+        versionCode = 17
+        versionName = "1.2.12.17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.lifecycle.process)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.documentfile)

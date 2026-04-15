@@ -111,13 +111,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (savedInstanceState == null) {
-            int openCount = prefs.getInt(KEY_APP_OPENS, 0) + 1;
-            prefs.edit().putInt(KEY_APP_OPENS, openCount).apply();
-            if (openCount % 5 == 0) {
-                loadAndShowInterstitialAd();
-            }
-        }
+        // App Open Ad is now handled by AppOpenManager automatically on foreground.
+        // Removed the every 5th cold-start Interstitial to avoid double ads.
+
         setSupportActionBar(binding.appBarMain.toolbar);
         binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -275,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeNavigation(DrawerLayout drawer, NavigationView navigationView) {
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_jobs, R.id.nav_gallery, R.id.nav_post_job, R.id.nav_rewards, R.id.nav_saved_jobs, R.id.nav_slideshow, R.id.nav_ai)
+                R.id.nav_home, R.id.nav_jobs, R.id.nav_gallery, R.id.nav_post_job, R.id.nav_rewards, R.id.nav_saved_jobs, R.id.nav_slideshow, R.id.nav_ai, R.id.nav_terms)
                 .setOpenableLayout(drawer)
                 .build();
 

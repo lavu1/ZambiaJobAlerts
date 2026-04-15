@@ -16,9 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdLoader;
@@ -26,8 +25,6 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
@@ -39,7 +36,6 @@ import com.solutions.alphil.zambiajobalerts.classes.JobsAdapter;
 import com.solutions.alphil.zambiajobalerts.databinding.FragmentJobsListBinding;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class JobsListFragment extends Fragment {
@@ -68,13 +64,19 @@ public class JobsListFragment extends Fragment {
         setupRecyclerView();
         setupObservers();
 
+        // Search Banner - Standard
         AdView adViewsearch = binding.adViewsearch;
         AdRequest adRequestsearch = new AdRequest.Builder().build();
         adViewsearch.loadAd(adRequestsearch);
 
+        // Bottom Banner - COLLAPSIBLE
         AdView adView = binding.adView;
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
+        Bundle extras = new Bundle();
+        extras.putString("collapsible", "bottom");
+        AdRequest adRequestCollapsible = new AdRequest.Builder()
+                .addNetworkExtrasBundle(AdMobAdapter.class, extras)
+                .build();
+        adView.loadAd(adRequestCollapsible);
 
         // Handle job_id from intent
         if (getActivity() != null) {
@@ -91,7 +93,6 @@ public class JobsListFragment extends Fragment {
             if (openJobId > 0) {
                 JobDetailsBottomSheet detailsSheet = JobDetailsBottomSheet.newInstance(openJobId);
                 detailsSheet.show(getParentFragmentManager(), "JobDetails");
-                // Clear the argument to avoid reopening
                 getArguments().remove("open_job_id");
             }
         }
@@ -114,9 +115,7 @@ public class JobsListFragment extends Fragment {
                     "🚀 Keep applying — your next opportunity is around the corner!"
             };
             int index = (int) (Math.random() * messages.length);
-
             View rootView = requireActivity().findViewById(android.R.id.content);
-
             Snackbar.make(rootView, messages[index], Snackbar.LENGTH_LONG)
                     .setAction("Okay", v -> Navigation.findNavController(v).navigate(R.id.nav_rewards))
                     .show();
@@ -130,7 +129,6 @@ public class JobsListFragment extends Fragment {
         ).get(JobsViewModel.class);
     }
     private void setupRecyclerView() {
-        // Initialize with empty list - this is crucial
         adapter = new JobsAdapter(new ArrayList<>(), job -> {
             if (isDetailsShowing) return;
 
@@ -159,18 +157,10 @@ public class JobsListFragment extends Fragment {
 
     private List<Object> buildDisplayListWithAds(List<Job> jobs) {
         List<Object> displayList = new ArrayList<>();
-
-        if (jobs.isEmpty()) {
-            return displayList;
-        }
-
+        if (jobs.isEmpty()) return displayList;
         int adIndex = 0;
-
         for (int i = 0; i < jobs.size(); i++) {
-            // Always add the job first
             displayList.add(jobs.get(i));
-
-            // Insert ad after every 4th job (positions 4, 8, 12, etc.)
             if ((i + 1) % 4 == 0 && adIndex < nativeAdPool.size()) {
                 NativeAd ad = nativeAdPool.get(adIndex);
                 if (ad != null) {
@@ -179,44 +169,35 @@ public class JobsListFragment extends Fragment {
                 }
             }
         }
-
-        // Load more ads if needed
         int totalAdsNeeded = (jobs.size() / 4) + 1;
         if (nativeAdPool.size() < totalAdsNeeded) {
             loadMoreNativeAds(totalAdsNeeded - nativeAdPool.size());
         }
-
-        Log.d("AdsDebug", "Built list with " + jobs.size() + " jobs and " + adIndex + " ads");
         return displayList;
     }
 
-private void initializeNativeAds() {
-    adLoader = new AdLoader.Builder(requireContext(), NATIVE_AD_UNIT_ID)
-            .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
-                @Override
-                public void onNativeAdLoaded(NativeAd nativeAd) {
-                    nativeAdPool.add(nativeAd);
-                    Log.d("AdsDebug", "Native ad loaded. Pool size: " + nativeAdPool.size());
-
-                    // Refresh the list when new ads are loaded
-                    if (viewModel.getJobs().getValue() != null && !viewModel.getJobs().getValue().isEmpty()) {
-                        List<Job> currentJobs = viewModel.getJobs().getValue();
-                        List<Object> displayList = buildDisplayListWithAds(currentJobs);
-                        adapter.updateDisplayList(displayList);
+    private void initializeNativeAds() {
+        adLoader = new AdLoader.Builder(requireContext(), NATIVE_AD_UNIT_ID)
+                .forNativeAd(new NativeAd.OnNativeAdLoadedListener() {
+                    @Override
+                    public void onNativeAdLoaded(NativeAd nativeAd) {
+                        nativeAdPool.add(nativeAd);
+                        if (viewModel.getJobs().getValue() != null && !viewModel.getJobs().getValue().isEmpty()) {
+                            List<Job> currentJobs = viewModel.getJobs().getValue();
+                            List<Object> displayList = buildDisplayListWithAds(currentJobs);
+                            adapter.updateDisplayList(displayList);
+                        }
                     }
-                }
-            })
-            .withAdListener(new AdListener() {
-                @Override
-                public void onAdFailedToLoad(LoadAdError adError) {
-                    Log.e("AdsDebug", "Native ad failed to load: " + adError.getMessage());
-                }
-            })
-            .build();
-
-    // Load initial ads
-    loadMoreNativeAds(3); // Start with 3 ads
-}
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError adError) {
+                        Log.e("AdsDebug", "Native ad failed to load: " + adError.getMessage());
+                    }
+                })
+                .build();
+        loadMoreNativeAds(3);
+    }
     private void loadMoreNativeAds(int count) {
         if (adLoader != null) {
             adLoader.loadAds(new AdRequest.Builder().build(), count);
@@ -260,9 +241,7 @@ private void initializeNativeAds() {
             }
         });
 
-        rewardedInterstitialAd.show(requireActivity(), rewardItem -> {
-            // Reward earned
-        });
+        rewardedInterstitialAd.show(requireActivity(), rewardItem -> {});
     }
 
     @Override
@@ -270,9 +249,6 @@ private void initializeNativeAds() {
         super.onDestroyView();
         binding = null;
     }
-
-
-    // In the JobsListFragment class, add these methods and update the observers:
 
     private void initViews() {
         binding.etSearch.setOnEditorActionListener((v, actionId, event) -> {
@@ -287,21 +263,13 @@ private void initializeNativeAds() {
         });
 
         binding.btnLoadMore.setOnClickListener(v -> viewModel.loadMoreJobs());
-
-        binding.swipeRefresh.setOnRefreshListener(() -> {
-            viewModel.loadJobs(true);
-        });
-
-        // Setup refresh button for empty state
-        binding.btnRefresh.setOnClickListener(v -> {
-            refreshJobs();
-        });
+        binding.swipeRefresh.setOnRefreshListener(() -> viewModel.loadJobs(true));
+        binding.btnRefresh.setOnClickListener(v -> refreshJobs());
     }
 
     private void setupObservers() {
         viewModel.getJobs().observe(getViewLifecycleOwner(), jobs -> {
             if (jobs != null && !jobs.isEmpty()) {
-                // Convert List<Job> to List<Object> with ads inserted
                 List<Object> displayList = buildDisplayListWithAds(jobs);
                 adapter.updateDisplayList(displayList);
                 binding.rvJobs.setVisibility(View.VISIBLE);
@@ -332,7 +300,6 @@ private void initializeNativeAds() {
         viewModel.getError().observe(getViewLifecycleOwner(), error -> {
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
-                // Show refresh button on error
                 binding.layoutNoJobs.setVisibility(View.VISIBLE);
                 binding.btnRefresh.setVisibility(View.VISIBLE);
             }

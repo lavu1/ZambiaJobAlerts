@@ -91,4 +91,10 @@
         android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.CareerCoachingFragment"
         android:label="Career Coaching"
         tools:layout="@layout/fragment_career_coaching" />
+
+    <fragment
+        android:id="@+id/nav_terms"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.terms.TermsFragment"
+        android:label="@string/menu_terms"
+        tools:layout="@layout/fragment_terms" />
 </navigation>
