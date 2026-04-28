@@ -106,6 +106,37 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnGenerateCv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Generate CV"
+                android:textSize="12sp"
+                android:background="@drawable/btn_apply_selector"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnGenerateCoverLetter"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Generate Cover"
+                android:textSize="12sp"
+                android:background="@drawable/btn_share_selector"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

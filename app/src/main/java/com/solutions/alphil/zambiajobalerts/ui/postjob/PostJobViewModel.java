@@ -11,6 +11,8 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.solutions.alphil.zambiajobalerts.classes.ApiConfig;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -43,16 +45,12 @@ public class PostJobViewModel extends AndroidViewModel {
     private static final String WP_USER = "lavum27@gmail.com";
 
     // Site URLs and Passwords from Node.js code
-    private static final String URL_ZAMBIA = "https://zambiajobalerts.com/wp-json/wp/v2/job-listings/";
+    private static final String URL_ZAMBIA = ApiConfig.WP_JOB_LISTINGS_URL;
     private static final String URL_MANCHINTO = "https://manchinto.com/wp-json/wp/v2/job-listings/";
     private static final String URL_ZINSTABLOG = "https://zinstablog.com/wp-json/wp/v2/job-listings/";
 
     private static final String PWD_MANCHINTO = "b3Xn 07gY vZpg 4LnS PRqI bDBe";
     private static final String PWD_ZINSTABLOG = "RvNV WeQu b6WD KuJK 8Hbd rB9K";
-
-    // Webpushr Credentials
-    private static final String WEBPUSHR_KEY = "82d976ee01019162668f6f92cec308fb";
-    private static final String WEBPUSHR_AUTH = "88373";
 
     private final SharedPreferences prefs;
     private final OkHttpClient client = new OkHttpClient();
@@ -149,15 +147,6 @@ public class PostJobViewModel extends AndroidViewModel {
                     if (url.equals(URL_ZAMBIA)) {
                         _isPosting.postValue(false);
                         _postResult.postValue("Job posted successfully!");
-                        
-                        // Send Push Notification after successful main post
-                        try {
-                            JSONObject respJson = new JSONObject(responseData);
-                            String jobUrl = respJson.optString("link", "https://zambiajobalerts.com");
-                            sendWebpushrNotification(titleForPush, jobUrl, companyForPush);
-                        } catch (Exception e) {
-                            Log.e("PostJob", "Error parsing response for push: " + e.getMessage());
-                        }
                     }
                 } else {
                     Log.e("PostJob", "Error from " + url + ": " + response.code() + " " + responseData);
@@ -168,49 +157,5 @@ public class PostJobViewModel extends AndroidViewModel {
                 }
             }
         });
-    }
-
-    private void sendWebpushrNotification(String title, String url, String company) {
-        if (title == null || url == null || company == null) return;
-        try {
-            String message = title + " Wanted for employment at " + company + " for details click apply button";
-            
-            JSONObject payload = new JSONObject();
-            payload.put("title", title);
-            payload.put("message", message);
-            payload.put("target_url", url);
-            
-            JSONArray buttons = new JSONArray();
-            JSONObject applyBtn = new JSONObject();
-            applyBtn.put("title", "Apply");
-            applyBtn.put("url", url);
-            buttons.put(applyBtn);
-            payload.put("action_buttons", buttons);
-
-            RequestBody body = RequestBody.create(payload.toString(), MediaType.parse("application/json; charset=utf-8"));
-
-            Request request = new Request.Builder()
-                    .url("https://api.webpushr.com/v1/notification/send/all")
-                    .post(body)
-                    .addHeader("webpushrKey", WEBPUSHR_KEY)
-                    .addHeader("webpushrAuthToken", WEBPUSHR_AUTH)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    Log.e("Webpushr", "Failed to send notification: " + e.getMessage());
-                }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    Log.d("Webpushr", "Notification sent: " + response.code());
-                }
-            });
-
-        } catch (Exception e) {
-            Log.e("Webpushr", "Error preparing notification: " + e.getMessage());
-        }
     }
 }

@@ -31,7 +31,30 @@
         android:id="@+id/nav_ai"
         android:name="com.solutions.alphil.zambiajobalerts.ui.aigenerate.CVGeneratorFragment"
         android:label="@string/menu_aiServices"
-        tools:layout="@layout/fragment_cv_generator" />
+        tools:layout="@layout/fragment_cv_generator">
+        <argument
+            android:name="source_job_id"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="source_job_title"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="source_company"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="prefill_type"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_documents"
+        android:name="com.solutions.alphil.zambiajobalerts.ui.aigenerate.DocumentLibraryFragment"
+        android:label="@string/menu_documents"
+        tools:layout="@layout/fragment_document_library" />
     <fragment
         android:id="@+id/nav_jobs"
         android:name="com.solutions.alphil.zambiajobalerts.ui.jobs.JobsListFragment"

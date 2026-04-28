@@ -19,17 +19,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
-import com.google.android.gms.ads.rewarded.RewardedAd;
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -88,8 +84,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String AD_UNIT_ID = "ca-app-pub-2168080105757285/4046795138";
     private static final String PREFS_NAMEC = "app_prefs";
     private static final String KEY_APP_OPENS = "app_opens";
-    private RewardedAd rewardedAd;
-    private static final String TEST_AD_UNIT_ID_REWARDED = "ca-app-pub-2168080105757285/1720477714";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,11 +112,13 @@ public class MainActivity extends AppCompatActivity {
         binding.appBarMain.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                loadAndShowInterstitialAd();
                 if (navController != null) {
-                    navController.navigate(R.id.nav_post_job);
+                    navController.navigate(R.id.nav_jobs);
                 } else {
-                    loadFragment(new PostJobFragment(), "PostJob");
+                    loadFragment(new JobsListFragment(), "PostJob");
                 }
+                // loadAndShowInterstitialAd();
             }
         });
 
@@ -201,51 +197,28 @@ public class MainActivity extends AppCompatActivity {
             Uri data = intent.getData();
             String path = data.getPath();
 
-            if (path != null && path.startsWith("/job/")) {
-                String identifier = path.substring("/job/".length()).replaceAll("/", "");
+            if (path != null && (path.startsWith("/job/") || path.startsWith("/jobs/"))) {
+                String prefix = path.startsWith("/jobs/") ? "/jobs/" : "/job/";
+                String identifier = path.substring(prefix.length()).replaceAll("/", "");
                 if (!identifier.isEmpty()) {
-                    // MAX REVENUE: Load Rewards (Ad) first, then open job details
-                    loadRewardsThenJob(identifier);
+                    // Open the job first. JobDetailsBottomSheet will show one rewarded ad after the job has loaded.
+                    navigateToJobDetails(identifier, true);
                 }
             }
         }
     }
 
-    private void loadRewardsThenJob(String identifier) {
-        Toast.makeText(this, "Loading Job details after the ad please wait!!!", Toast.LENGTH_LONG).show();
-        AdRequest adRequest = new AdRequest.Builder().build();
-        RewardedAd.load(this, TEST_AD_UNIT_ID_REWARDED, adRequest,
-                new RewardedAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull RewardedAd ad) {
-                        ad.setFullScreenContentCallback(new FullScreenContentCallback() {
-                            @Override
-                            public void onAdDismissedFullScreenContent() {
-                                navigateToJobDetails(identifier);
-                            }
-
-                            @Override
-                            public void onAdFailedToShowFullScreenContent(AdError adError) {
-                                navigateToJobDetails(identifier);
-                            }
-                        });
-                        ad.show(MainActivity.this, rewardItem -> {});
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        navigateToJobDetails(identifier);
-                    }
-                });
+    private void navigateToJobDetails(String identifier) {
+        navigateToJobDetails(identifier, false);
     }
 
-    private void navigateToJobDetails(String identifier) {
+    private void navigateToJobDetails(String identifier, boolean openedFromDeepLink) {
         try {
             int jobId = Integer.parseInt(identifier);
-            JobDetailsBottomSheet.newInstance(jobId)
+            JobDetailsBottomSheet.newInstance(jobId, openedFromDeepLink)
                     .show(getSupportFragmentManager(), "JobDetails");
         } catch (NumberFormatException e) {
-            JobDetailsBottomSheet.newInstance(identifier)
+            JobDetailsBottomSheet.newInstance(identifier, openedFromDeepLink)
                     .show(getSupportFragmentManager(), "JobDetails");
         }
     }
@@ -271,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeNavigation(DrawerLayout drawer, NavigationView navigationView) {
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_jobs, R.id.nav_gallery, R.id.nav_post_job, R.id.nav_rewards, R.id.nav_saved_jobs, R.id.nav_slideshow, R.id.nav_ai, R.id.nav_terms)
+                R.id.nav_home, R.id.nav_jobs, R.id.nav_gallery, R.id.nav_post_job, R.id.nav_rewards, R.id.nav_saved_jobs, R.id.nav_slideshow, R.id.nav_ai, R.id.nav_documents, R.id.nav_terms)
                 .setOpenableLayout(drawer)
                 .build();
 
@@ -346,10 +319,20 @@ public class MainActivity extends AppCompatActivity {
     }*/
 
     private void handleNotificationIntent(Intent intent) {
-        if (intent != null && intent.hasExtra("open_job_id")) {
-            int jobId = intent.getIntExtra("open_job_id", -1);
+        if (intent == null) {
+            return;
+        }
+
+        String jobSlug = intent.getStringExtra("job_slug");
+        if (jobSlug != null && !jobSlug.isEmpty()) {
+            navigateToJobDetails(jobSlug, false);
+            return;
+        }
+
+        if (intent.hasExtra("open_job_id") || intent.hasExtra("job_id")) {
+            int jobId = intent.getIntExtra("open_job_id", intent.getIntExtra("job_id", -1));
             if (jobId != -1) {
-                navigateToJobDetails(String.valueOf(jobId));
+                navigateToJobDetails(String.valueOf(jobId), false);
             }
         }
     }

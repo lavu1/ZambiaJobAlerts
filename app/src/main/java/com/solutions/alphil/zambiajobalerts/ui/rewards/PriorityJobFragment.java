@@ -21,6 +21,7 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.solutions.alphil.zambiajobalerts.R;
+import com.solutions.alphil.zambiajobalerts.classes.ApiConfig;
 
 import java.io.IOException;
 
@@ -39,7 +40,7 @@ public class PriorityJobFragment extends Fragment {
     private Context context;
     private OkHttpClient client;
     private AlertDialog loadingDialog;
-    private static final String SERVER_URL = "https://zambiajobalerts.com/system/api/services";
+    private static final String SERVER_URL = ApiConfig.LEGACY_SERVICES_URL;
     private RewardedAd rewardedAd;
     private static final String TEST_AD_UNIT_ID_REWARDED = "ca-app-pub-2168080105757285/1720477714";
 

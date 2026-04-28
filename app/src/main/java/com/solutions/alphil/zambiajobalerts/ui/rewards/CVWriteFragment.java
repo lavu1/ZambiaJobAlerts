@@ -21,6 +21,7 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.solutions.alphil.zambiajobalerts.R;
+import com.solutions.alphil.zambiajobalerts.classes.ApiConfig;
 
 import java.io.IOException;
 
@@ -34,7 +35,7 @@ import okhttp3.Response;
 
 public class CVWriteFragment extends Fragment {
 
-    private static final String SERVER_URL = "https://zambiajobalerts.com/system/api/services";
+    private static final String SERVER_URL = ApiConfig.LEGACY_SERVICES_URL;
     private EditText nameInput, emailInput, addNotes, phoneInput, educationInput, workInput, skillsInput;
     private Button submitBtn;
     private Context context;

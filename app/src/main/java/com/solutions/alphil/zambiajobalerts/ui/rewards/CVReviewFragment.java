@@ -24,6 +24,7 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.solutions.alphil.zambiajobalerts.R;
+import com.solutions.alphil.zambiajobalerts.classes.ApiConfig;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -327,7 +328,7 @@ public class CVReviewFragment extends Fragment {
                     .build();
 
             Request request = new Request.Builder()
-                    .url("https://zambiajobalerts.com/system/api/services")
+                    .url(ApiConfig.LEGACY_SERVICES_URL)
                     .post(requestBody)
                     .build();
 

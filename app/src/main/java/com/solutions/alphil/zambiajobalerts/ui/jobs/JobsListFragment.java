@@ -34,6 +34,7 @@ import com.solutions.alphil.zambiajobalerts.classes.Job;
 import com.solutions.alphil.zambiajobalerts.classes.JobDetailsBottomSheet;
 import com.solutions.alphil.zambiajobalerts.classes.JobsAdapter;
 import com.solutions.alphil.zambiajobalerts.databinding.FragmentJobsListBinding;
+import com.solutions.alphil.zambiajobalerts.ui.aigenerate.CVGeneratorFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,30 +130,60 @@ public class JobsListFragment extends Fragment {
         ).get(JobsViewModel.class);
     }
     private void setupRecyclerView() {
-        adapter = new JobsAdapter(new ArrayList<>(), job -> {
-            if (isDetailsShowing) return;
+        adapter = new JobsAdapter(new ArrayList<>(), new JobsAdapter.OnJobClickListener() {
+            @Override
+            public void onJobClick(Job job) {
+                if (isDetailsShowing) return;
 
-            isDetailsShowing = true;
-            int viewCount = prefs.getInt("job_views", 0) + 1;
-            prefs.edit().putInt("job_views", viewCount).apply();
+                isDetailsShowing = true;
+                int viewCount = prefs.getInt("job_views", 0) + 1;
+                prefs.edit().putInt("job_views", viewCount).apply();
 
-            Runnable showDetails = () -> {
-                if (getParentFragmentManager().findFragmentByTag("JobDetails") == null) {
-                    JobDetailsBottomSheet detailsSheet = JobDetailsBottomSheet.newInstance(job.getId());
-                    detailsSheet.show(getParentFragmentManager(), "JobDetails");
+                Runnable showDetails = () -> {
+                    if (getParentFragmentManager().findFragmentByTag("JobDetails") == null) {
+                        JobDetailsBottomSheet detailsSheet = JobDetailsBottomSheet.newInstance(job.getId());
+                        detailsSheet.show(getParentFragmentManager(), "JobDetails");
+                    }
+                    isDetailsShowing = false;
+                };
+
+                if (viewCount % 5 == 0) {
+                    showRewardedInterstitialAd(showDetails);
+                } else {
+                    showDetails.run();
                 }
-                isDetailsShowing = false;
-            };
+            }
 
-            if (viewCount % 5 == 0) {
-                showRewardedInterstitialAd(showDetails);
-            } else {
-                showDetails.run();
+            @Override
+            public void onGenerateCv(Job job) {
+                openGeneratorForJob(job, CVGeneratorFragment.ARG_CV_TYPE);
+            }
+
+            @Override
+            public void onGenerateCoverLetter(Job job) {
+                openGeneratorForJob(job, CVGeneratorFragment.ARG_COVER_TYPE);
             }
         });
 
         binding.rvJobs.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvJobs.setAdapter(adapter);
+    }
+
+    private void openGeneratorForJob(Job job, String prefillType) {
+        if (job == null || !isAdded() || getView() == null) {
+            return;
+        }
+
+        Bundle args = new Bundle();
+        args.putInt(CVGeneratorFragment.ARG_SOURCE_JOB_ID, job.getId());
+        args.putString(CVGeneratorFragment.ARG_SOURCE_JOB_TITLE, job.getTitle());
+        args.putString(CVGeneratorFragment.ARG_SOURCE_COMPANY, job.getCompany());
+        args.putString(CVGeneratorFragment.ARG_PREFILL_TYPE, prefillType);
+
+        Navigation.findNavController(requireView()).navigate(R.id.nav_ai, args);
+        Toast.makeText(requireContext(), "Generating " + (CVGeneratorFragment.ARG_COVER_TYPE.equals(prefillType)
+                ? "Cover Letter"
+                : "CV"), Toast.LENGTH_SHORT).show();
     }
 
     private List<Object> buildDisplayListWithAds(List<Job> jobs) {

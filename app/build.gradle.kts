@@ -1,19 +1,19 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29" apply false
+    id("com.google.devtools.ksp") version "2.3.6" apply false
 }
 
 android {
     namespace = "com.solutions.alphil.zambiajobalerts"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.solutions.alphil.zambiajobalerts"
         minSdk = 28
-        targetSdk = 36
-        versionCode = 17
-        versionName = "1.2.12.17"
+        targetSdk = 37
+        versionCode = 20
+        versionName = "1.2.12.20"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -57,6 +57,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message data payload: " + data);
 
             String jobId = data.get("job_id");
+            String jobSlug = data.get("job_slug");
             String type = data.get("type");
             String title = data.get("title");
             String message = data.get("message");
@@ -73,11 +74,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (title == null) title = "New Job Alert!";
             if (message == null) message = "Tap to view job details";
 
-            showNotification(title, message, jobId, type, company, location);
+            showNotification(title, message, jobId, type, company, location, jobSlug);
         } else if (remoteMessage.getNotification() != null) {
             showNotification(
                     remoteMessage.getNotification().getTitle(),
                     remoteMessage.getNotification().getBody(),
+                    null,
                     null,
                     null,
                     null,
@@ -94,7 +96,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void showNotification(String title, String body, String jobId, String type, String company, String location) {
+    private void showNotification(String title, String body, String jobId, String type, String company, String location, String jobSlug) {
         try {
             createNotificationChannel();
 
@@ -107,6 +109,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "Invalid job ID: " + jobId);
                 }
+            }
+            if (jobSlug != null && !jobSlug.isEmpty()) {
+                intent.putExtra("job_slug", jobSlug);
             }
             if (type != null) {
                 try {
@@ -150,7 +155,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (manager != null) {
-                int notificationId = (jobId != null) ? Integer.parseInt(jobId) : requestCode;
+                int notificationId = requestCode;
+                if (jobId != null) {
+                    try {
+                        notificationId = Integer.parseInt(jobId);
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Invalid notification ID: " + jobId);
+                    }
+                }
                 manager.notify(notificationId, builder.build());
             }
 

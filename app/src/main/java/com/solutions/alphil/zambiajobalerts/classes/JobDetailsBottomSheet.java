@@ -20,13 +20,20 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.solutions.alphil.zambiajobalerts.R;
 import com.solutions.alphil.zambiajobalerts.databinding.BottomSheetJobDetailsBinding;
+import com.solutions.alphil.zambiajobalerts.ui.aigenerate.CVGeneratorFragment;
 import com.solutions.alphil.zambiajobalerts.ui.jobs.JobsViewModel;
 import com.solutions.alphil.zambiajobalerts.ui.savedjobs.SavedJobsViewModel;
+import androidx.navigation.Navigation;
 
 public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
 
@@ -37,19 +44,32 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
     private int jobId = -1;
     private String jobSlug;
     private Job currentJob;
+    private boolean openedFromDeepLink = false;
+    private boolean hasShownJobLoadedAd = false;
+    private static final String REWARDED_AD_UNIT_ID = "ca-app-pub-2168080105757285/1720477714";
 
     public static JobDetailsBottomSheet newInstance(int jobId) {
+        return newInstance(jobId, false);
+    }
+
+    public static JobDetailsBottomSheet newInstance(int jobId, boolean openedFromDeepLink) {
         JobDetailsBottomSheet fragment = new JobDetailsBottomSheet();
         Bundle args = new Bundle();
         args.putInt("job_id", jobId);
+        args.putBoolean("opened_from_deep_link", openedFromDeepLink);
         fragment.setArguments(args);
         return fragment;
     }
 
     public static JobDetailsBottomSheet newInstance(String slug) {
+        return newInstance(slug, false);
+    }
+
+    public static JobDetailsBottomSheet newInstance(String slug, boolean openedFromDeepLink) {
         JobDetailsBottomSheet fragment = new JobDetailsBottomSheet();
         Bundle args = new Bundle();
         args.putString("job_slug", slug);
+        args.putBoolean("opened_from_deep_link", openedFromDeepLink);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,6 +80,7 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
         if (getArguments() != null) {
             jobId = getArguments().getInt("job_id", -1);
             jobSlug = getArguments().getString("job_slug");
+            openedFromDeepLink = getArguments().getBoolean("opened_from_deep_link", false);
         }
         repository = new JobRepository(requireActivity().getApplication());
     }
@@ -79,7 +100,7 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
 
         loadJobDetails();
         setupClickListeners();
-        
+
         // MAX REVENUE: Show pre-cached interstitial ad immediately on opening details
         if (AdManager.getInstance().isInterstitialAdLoaded()) {
             InterstitialAd interstitialAd = AdManager.getInstance().getInterstitialAd();
@@ -97,7 +118,7 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
 
     private void loadJobDetails() {
         binding.progressBar.setVisibility(View.VISIBLE);
-        
+
         if (jobId != -1) {
             repository.fetchJobDetails(jobId, new JobRepository.ResponseListener<JobEntity>() {
                 @Override
@@ -119,6 +140,7 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
                     updateSaveButtonState(job.getId());
                     binding.progressBar.setVisibility(View.GONE);
                     binding.contentLayout.setVisibility(View.VISIBLE);
+                    showJobLoadedAdOnce();
                 }
             });
         }
@@ -131,6 +153,7 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
             updateSaveButtonState(currentJob.getId());
             binding.progressBar.setVisibility(View.GONE);
             binding.contentLayout.setVisibility(View.VISIBLE);
+            showJobLoadedAdOnce();
         });
     }
 
@@ -160,7 +183,7 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
                 if (midIndex != -1) {
                     String firstHalf = fullDescription.substring(0, midIndex);
                     String secondHalf = fullDescription.substring(midIndex);
-                    
+
                     binding.tvDescription.setText(Html.fromHtml(firstHalf, Html.FROM_HTML_MODE_COMPACT));
                     binding.tvDescriptionBottom.setText(Html.fromHtml(secondHalf, Html.FROM_HTML_MODE_COMPACT));
                     binding.tvDescriptionBottom.setVisibility(View.VISIBLE);
@@ -174,6 +197,71 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
                 binding.adViewDescription.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+
+    private void showJobLoadedAdOnce() {
+        if (hasShownJobLoadedAd || !isAdded() || getActivity() == null) {
+            return;
+        }
+
+        hasShownJobLoadedAd = true;
+
+        if (openedFromDeepLink) {
+            showRewardedAdOnceAfterJobLoaded();
+        } else {
+            showInterstitialAdOnceAfterJobLoaded();
+        }
+    }
+
+    private void showInterstitialAdOnceAfterJobLoaded() {
+        if (!AdManager.getInstance().isInterstitialAdLoaded()) {
+            AdManager.getInstance().loadInterstitialAd(requireContext());
+            return;
+        }
+
+        InterstitialAd interstitialAd = AdManager.getInstance().getInterstitialAd();
+        if (interstitialAd == null) {
+            return;
+        }
+
+        interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                AdManager.getInstance().clearInterstitialAd();
+                AdManager.getInstance().loadInterstitialAd(requireContext());
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                AdManager.getInstance().clearInterstitialAd();
+                AdManager.getInstance().loadInterstitialAd(requireContext());
+            }
+        });
+
+        interstitialAd.show(requireActivity());
+    }
+
+    private void showRewardedAdOnceAfterJobLoaded() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        RewardedAd.load(requireContext(), REWARDED_AD_UNIT_ID, adRequest,
+                new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                        if (!isAdded() || getActivity() == null) {
+                            return;
+                        }
+
+                        rewardedAd.show(requireActivity(), rewardItem -> {
+                            // No reward action is needed here. The ad is only used after deep-link job loading.
+                        });
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        Log.d("JobDetailsBottomSheet", "Rewarded ad failed to load: " + loadAdError.getMessage());
+                    }
+                });
     }
 
     private void setupClickListeners() {
@@ -203,6 +291,25 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
                 updateSaveButtonState(currentJob.getId());
             }
         });
+
+        binding.btnGenerateCv.setOnClickListener(v -> openGenerator(CVGeneratorFragment.ARG_CV_TYPE));
+        binding.btnGenerateCoverLetter.setOnClickListener(v -> openGenerator(CVGeneratorFragment.ARG_COVER_TYPE));
+    }
+
+    private void openGenerator(String prefillType) {
+        if (currentJob == null || getActivity() == null) {
+            return;
+        }
+
+        Bundle args = new Bundle();
+        args.putInt(CVGeneratorFragment.ARG_SOURCE_JOB_ID, currentJob.getId());
+        args.putString(CVGeneratorFragment.ARG_SOURCE_JOB_TITLE, currentJob.getTitle());
+        args.putString(CVGeneratorFragment.ARG_SOURCE_COMPANY, currentJob.getCompany());
+        args.putString(CVGeneratorFragment.ARG_PREFILL_TYPE, prefillType);
+
+        Navigation.findNavController(getActivity(), R.id.nav_host_fragment_content_main)
+                .navigate(R.id.nav_ai, args);
+        dismiss();
     }
 
     private void applyForJob(Job job) {

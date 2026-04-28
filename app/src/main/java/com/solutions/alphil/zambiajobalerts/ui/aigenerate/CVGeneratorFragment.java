@@ -1,13 +1,12 @@
 package com.solutions.alphil.zambiajobalerts.ui.aigenerate;
+
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -23,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -30,108 +30,98 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.solutions.alphil.zambiajobalerts.R;
+import com.solutions.alphil.zambiajobalerts.classes.GeneratedDocument;
+import com.solutions.alphil.zambiajobalerts.classes.GeneratedDocumentStore;
+import com.solutions.alphil.zambiajobalerts.classes.GeneratedDocumentWriter;
+import com.solutions.alphil.zambiajobalerts.classes.ModelFallbackGenerator;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import java.util.UUID;
 
 public class CVGeneratorFragment extends Fragment {
 
+    public static final String ARG_SOURCE_JOB_ID = "source_job_id";
+    public static final String ARG_SOURCE_JOB_TITLE = "source_job_title";
+    public static final String ARG_SOURCE_COMPANY = "source_company";
+    public static final String ARG_PREFILL_TYPE = "prefill_type";
+
     private static final String TAG = "CVGeneratorFragment";
-    private static final String PREFS_NAME = "CVDataPrefs";
-    private static final String KEY_GENERATED_LINKS = "generated_links";
-    private static final String KEY_GENERATED_TEXTS = "generated_texts";
-    private static final String API_URL = "https://zambiajobalerts.com/system/api/generate-texts";
 
-    // Media type constants
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    public static final String ARG_CV_TYPE = "cv";
+    public static final String ARG_COVER_TYPE = "cover_letter";
 
-    // Selection options
-    private final String[] documentTypes = {"CV/Resume", "Cover Letter"};
-    private final String[] documentFormats = {"PDF Document", "Word Document", "Text Only"};
-    private final String[] letterTones = {"Formal", "Professional", "Confident", "Friendly", "Enthusiastic"};
+    private TextView selectedTypeText;
+    private TextView selectedFormatText;
+    private TextView selectedToneText;
+    private Button selectTypeBtn;
+    private Button selectFormatBtn;
+    private Button selectToneBtn;
+    private LinearLayout toneSelectionLayout;
+    private LinearLayout cvFields;
+    private LinearLayout coverLetterFields;
+    private LinearLayout resultsLayout;
 
-    // UI Components
-    private TextView selectedTypeText, selectedFormatText, selectedToneText;
-    private Button selectTypeBtn, selectFormatBtn, selectToneBtn;
-    private LinearLayout toneSelectionLayout, cvFields, coverLetterFields, resultsLayout;
-    private EditText nameInput, emailInput, phoneInput, positionInput, educationInput,
-            experienceInput, skillsInput, companyInput, positionApplyingInput,
-            experienceSummaryInput, addNotesInput;
-    private Button submitBtn, viewGeneratedBtn, copyTextBtn, downloadBtn;
+    private EditText nameInput;
+    private EditText emailInput;
+    private EditText phoneInput;
+    private EditText positionInput;
+    private EditText educationInput;
+    private EditText experienceInput;
+    private EditText skillsInput;
+    private EditText companyInput;
+    private EditText positionApplyingInput;
+    private EditText experienceSummaryInput;
+    private EditText addNotesInput;
+
+    private Button submitBtn;
+    private Button viewGeneratedBtn;
+    private Button copyTextBtn;
+    private Button downloadBtn;
+
     private TextView resultTextView;
 
     private AlertDialog loadingDialog;
     private RewardedAd rewardedAd;
     private static final String TEST_AD_UNIT_ID_REWARDED = "ca-app-pub-2168080105757285/1720477714";
+    private boolean pendingGenerateAfterAd = false;
 
-    private String selectedType = "cv";
+    private final String[] documentTypes = {"CV/Resume", "Cover Letter"};
+    private final String[] documentFormats = {"PDF Document", "Word Document", "Text Only"};
+    private final String[] letterTones = {"Formal", "Professional", "Confident", "Friendly", "Enthusiastic"};
+
+    private String selectedType = ARG_CV_TYPE;
     private String selectedFormat = "pdf";
     private String selectedTone = "formal";
-    private String deviceId;
 
-    // Store current generation results
-    private String currentFileLink = "";
+    private int sourceJobId = -1;
+    private String sourceJobTitle = "";
+    private String sourceCompany = "";
+
+    private String currentFilePath = "";
     private String currentTextResult = "";
 
-    private final OkHttpClient client = new OkHttpClient();
+    private GeneratedDocumentStore documentStore;
+    private GeneratedDocumentWriter documentWriter;
+    private ModelFallbackGenerator modelGenerator;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_cv_generator, container, false);
 
-        // Initialize device ID
-        deviceId = getDeviceId();
+        documentStore = new GeneratedDocumentStore(requireContext());
+        documentWriter = new GeneratedDocumentWriter(requireContext());
+        modelGenerator = new ModelFallbackGenerator();
 
-        // Initialize UI components
         initializeUI(root);
-
-        // Initialize ads
         initializeAds(root);
+        applyPrefillArguments();
 
         return root;
     }
-    private String getDeviceId() {
-        SharedPreferences prefs = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String uniqueID = prefs.getString("device_uuid", null);
-        if (uniqueID == null) {
-            uniqueID = java.util.UUID.randomUUID().toString();
-            prefs.edit().putString("device_uuid", uniqueID).apply();
-        }
-        return uniqueID;
-    }
-    /*
-    private String getDeviceId() {
-        if (getContext() == null) return "unknown_device";
-
-        SharedPreferences prefs = getContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String deviceId = prefs.getString("device_id", null);
-
-        if (deviceId == null) {
-            deviceId = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-            if (deviceId == null) {
-                deviceId = "device_" + System.currentTimeMillis();
-            }
-            prefs.edit().putString("device_id", deviceId).apply();
-        }
-
-        return deviceId;
-    }*/
 
     private void initializeUI(View root) {
-        // Initialize selection views
         selectedTypeText = root.findViewById(R.id.selectedTypeText);
         selectedFormatText = root.findViewById(R.id.selectedFormatText);
         selectedToneText = root.findViewById(R.id.selectedToneText);
@@ -145,7 +135,6 @@ public class CVGeneratorFragment extends Fragment {
         coverLetterFields = root.findViewById(R.id.coverLetterFields);
         resultsLayout = root.findViewById(R.id.resultsLayout);
 
-        // Initialize input fields
         nameInput = root.findViewById(R.id.nameInput);
         emailInput = root.findViewById(R.id.emailInput);
         phoneInput = root.findViewById(R.id.phoneInput);
@@ -158,40 +147,33 @@ public class CVGeneratorFragment extends Fragment {
         experienceSummaryInput = root.findViewById(R.id.experienceSummaryInput);
         addNotesInput = root.findViewById(R.id.addNotesInput);
 
-        // Initialize action buttons
         submitBtn = root.findViewById(R.id.submitButton);
         viewGeneratedBtn = root.findViewById(R.id.viewGeneratedBtn);
         copyTextBtn = root.findViewById(R.id.copyTextBtn);
         downloadBtn = root.findViewById(R.id.downloadBtn);
 
-        // Initialize result text view
         resultTextView = root.findViewById(R.id.resultTextView);
-
-        // Make result text clickable for links
         resultTextView.setMovementMethod(LinkMovementMethod.getInstance());
         resultTextView.setAutoLinkMask(Linkify.WEB_URLS);
         resultTextView.setTextIsSelectable(true);
 
-        // Set click listeners for selection buttons
         selectTypeBtn.setOnClickListener(v -> showDocumentTypeDialog());
         selectFormatBtn.setOnClickListener(v -> showFormatDialog());
         selectToneBtn.setOnClickListener(v -> showToneDialog());
 
-        // Also make the text views clickable
         selectedTypeText.setOnClickListener(v -> showDocumentTypeDialog());
         selectedFormatText.setOnClickListener(v -> showFormatDialog());
         selectedToneText.setOnClickListener(v -> showToneDialog());
 
-        // Set click listeners for action buttons
         submitBtn.setOnClickListener(v -> validateAndSubmit());
-        viewGeneratedBtn.setOnClickListener(v -> showGeneratedDocumentsDialog());
+        viewGeneratedBtn.setOnClickListener(v -> openLibrary());
         copyTextBtn.setOnClickListener(v -> copyCurrentTextToClipboard());
         downloadBtn.setOnClickListener(v -> downloadCurrentFile());
 
-        // Set initial values
         selectedTypeText.setText("CV/Resume");
         selectedFormatText.setText("PDF Document");
         selectedToneText.setText("Formal");
+        viewGeneratedBtn.setText("Open Saved Documents");
     }
 
     private void initializeAds(View root) {
@@ -206,14 +188,49 @@ public class CVGeneratorFragment extends Fragment {
         }
     }
 
+    private void applyPrefillArguments() {
+        Bundle args = getArguments();
+        if (args == null) {
+            return;
+        }
+
+        sourceJobId = args.getInt(ARG_SOURCE_JOB_ID, -1);
+        sourceJobTitle = args.getString(ARG_SOURCE_JOB_TITLE, "");
+        sourceCompany = args.getString(ARG_SOURCE_COMPANY, "");
+        String prefillType = args.getString(ARG_PREFILL_TYPE, "");
+
+        if (ARG_COVER_TYPE.equals(prefillType)) {
+            selectedType = ARG_COVER_TYPE;
+            selectedTypeText.setText("Cover Letter");
+            if (!sourceCompany.isEmpty()) {
+                companyInput.setText(sourceCompany);
+            }
+            if (!sourceJobTitle.isEmpty()) {
+                positionApplyingInput.setText(sourceJobTitle);
+            }
+        } else {
+            selectedType = ARG_CV_TYPE;
+            selectedTypeText.setText("CV/Resume");
+            if (!sourceJobTitle.isEmpty()) {
+                positionInput.setText(sourceJobTitle);
+            }
+        }
+
+        setTextIfAbsent(nameInput, args.getString("name"));
+        setTextIfAbsent(emailInput, args.getString("email"));
+        setTextIfAbsent(phoneInput, args.getString("phone"));
+
+        updateFieldsVisibility();
+    }
+
     private void showDocumentTypeDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Select Document Type");
 
-        int currentIndex = selectedType.equals("cv") ? 0 : 1;
+        int currentIndex = ARG_CV_TYPE.equals(selectedType) ? 0 : 1;
 
         builder.setSingleChoiceItems(documentTypes, currentIndex, (dialog, which) -> {
-            selectedType = which == 0 ? "cv" : "cover_letter";
+            selectedType = which == 0 ? ARG_CV_TYPE : ARG_COVER_TYPE;
             selectedTypeText.setText(documentTypes[which]);
             updateFieldsVisibility();
             dialog.dismiss();
@@ -227,25 +244,17 @@ public class CVGeneratorFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Select Document Format");
 
-        int currentIndex = selectedFormat.equals("pdf") ? 0 : 1;
+        int currentIndex = "pdf".equals(selectedFormat) ? 0 : "docx".equals(selectedFormat) ? 1 : 2;
 
         builder.setSingleChoiceItems(documentFormats, currentIndex, (dialog, which) -> {
-           // selectedFormat
-            switch (which) {
-                case 0:
-                    selectedFormat = "pdf";
-                    break;
-                case 1:
-                    selectedFormat = "docx";
-                    break;
-                case 2:
-                    selectedFormat = "txt";
-                    break;
-                default:
-                    selectedFormat = "docx";
-
+            if (which == 0) {
+                selectedFormat = "pdf";
+            } else if (which == 1) {
+                selectedFormat = "docx";
+            } else {
+                selectedFormat = "txt";
             }
-            //which == 0 ? "pdf" : "text";
+
             selectedFormatText.setText(documentFormats[which]);
             dialog.dismiss();
         });
@@ -260,11 +269,18 @@ public class CVGeneratorFragment extends Fragment {
 
         int currentIndex = 0;
         switch (selectedTone) {
-            case "formal": currentIndex = 0; break;
-            case "professional": currentIndex = 1; break;
-            case "confident": currentIndex = 2; break;
-            case "friendly": currentIndex = 3; break;
-            case "enthusiastic": currentIndex = 4; break;
+            case "professional":
+                currentIndex = 1;
+                break;
+            case "confident":
+                currentIndex = 2;
+                break;
+            case "friendly":
+                currentIndex = 3;
+                break;
+            case "enthusiastic":
+                currentIndex = 4;
+                break;
         }
 
         builder.setSingleChoiceItems(letterTones, currentIndex, (dialog, which) -> {
@@ -278,7 +294,7 @@ public class CVGeneratorFragment extends Fragment {
     }
 
     private void updateFieldsVisibility() {
-        if (selectedType.equals("cv")) {
+        if (ARG_CV_TYPE.equals(selectedType)) {
             cvFields.setVisibility(View.VISIBLE);
             coverLetterFields.setVisibility(View.GONE);
             toneSelectionLayout.setVisibility(View.GONE);
@@ -290,189 +306,189 @@ public class CVGeneratorFragment extends Fragment {
     }
 
     private void validateAndSubmit() {
-        // Basic validation
         if (nameInput.getText().toString().trim().isEmpty() ||
                 emailInput.getText().toString().trim().isEmpty() ||
                 phoneInput.getText().toString().trim().isEmpty()) {
-
             Toast.makeText(getContext(), "Please fill all required fields!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // CV-specific validation
-        if (selectedType.equals("cv") && positionInput.getText().toString().trim().isEmpty()) {
+        if (ARG_CV_TYPE.equals(selectedType) && positionInput.getText().toString().trim().isEmpty()) {
             Toast.makeText(getContext(), "Please enter position/job title!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Cover letter-specific validation
-        if (selectedType.equals("cover_letter") &&
+        if (ARG_COVER_TYPE.equals(selectedType) &&
                 (companyInput.getText().toString().trim().isEmpty() ||
                         positionApplyingInput.getText().toString().trim().isEmpty())) {
             Toast.makeText(getContext(), "Please enter company and position!", Toast.LENGTH_SHORT).show();
             return;
         }
+
         submitBtn.setEnabled(false);
         showLoadingDialog("Loading ad, please wait...");
         loadRewardedAdRewarded();
     }
 
     private void generateDocument() {
-        showLoadingDialog("Generating your " + selectedType + "...");
+        String prompt = buildPrompt();
+        modelGenerator.generateText(prompt, new ModelFallbackGenerator.GenerationListener() {
+            @Override
+            public void onSuccess(String generatedText) {
+                if (!isAdded()) {
+                    return;
+                }
+                requireActivity().runOnUiThread(() -> saveGeneratedDocument(generatedText));
+            }
+
+            @Override
+            public void onFailure(String message) {
+                if (!isAdded()) {
+                    return;
+                }
+
+                requireActivity().runOnUiThread(() -> {
+                    dismissLoadingDialog();
+                    submitBtn.setEnabled(true);
+                    showResult("❌ GENERATION FAILED\n\n" + message);
+                    Toast.makeText(getContext(), "Generation failed", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
+    private String buildPrompt() {
+        StringBuilder prompt = new StringBuilder();
+        String fullName = nameInput.getText().toString().trim();
+        String email = emailInput.getText().toString().trim();
+        String phone = phoneInput.getText().toString().trim();
+        String notes = addNotesInput.getText().toString().trim();
+
+        prompt.append("Write the document as a professional, concise, and interview-ready text.\n\n");
+        prompt.append("Applicant Name: ").append(fullName).append("\n");
+        prompt.append("Email: ").append(email).append("\n");
+        prompt.append("Phone: ").append(phone).append("\n\n");
+
+        if (ARG_COVER_TYPE.equals(selectedType)) {
+            String company = companyInput.getText().toString().trim();
+            String job = positionApplyingInput.getText().toString().trim();
+            String experience = experienceSummaryInput.getText().toString().trim();
+
+            prompt.append("Write a cover letter for this job application.\n");
+            prompt.append("Company: ").append(company).append("\n");
+            prompt.append("Role: ").append(job).append("\n");
+            prompt.append("Tone: ").append(selectedTone).append("\n\n");
+            if (!experience.isEmpty()) {
+                prompt.append("Relevant experience: ").append(experience).append("\n");
+            }
+
+            if (sourceJobId != -1 && !sourceCompany.isEmpty()) {
+                prompt.append("Match it to the job details for: ").append(sourceCompany).append(" role in");
+                if (!sourceJobTitle.isEmpty()) {
+                    prompt.append(" ").append(sourceJobTitle);
+                }
+                prompt.append(".\n");
+            }
+        } else {
+            String position = positionInput.getText().toString().trim();
+            String education = educationInput.getText().toString().trim();
+            String experience = experienceInput.getText().toString().trim();
+            String skills = skillsInput.getText().toString().trim();
+
+            prompt.append("Write a modern CV/Resume for the role: ").append(position).append("\n");
+            if (!education.isEmpty()) {
+                prompt.append("Education: ").append(education).append("\n");
+            }
+            if (!experience.isEmpty()) {
+                prompt.append("Work experience: ").append(experience).append("\n");
+            }
+            if (!skills.isEmpty()) {
+                prompt.append("Skills: ").append(skills).append("\n");
+            }
+        }
+
+        if (!notes.isEmpty()) {
+            prompt.append("Extra notes: ").append(notes).append("\n");
+        }
+
+        prompt.append("\nReturn only the plain document text. Keep it ready to download as text.");
+
+        return prompt.toString();
+    }
+
+    private void saveGeneratedDocument(String generatedText) {
+        if (generatedText == null || generatedText.trim().isEmpty()) {
+            dismissLoadingDialog();
+            submitBtn.setEnabled(true);
+            showResult("❌ MODEL RETURNED EMPTY RESULT\n\nNo content was produced.");
+            return;
+        }
+
+        String outputBaseName = buildOutputBaseName();
 
         try {
-            JSONObject requestBody = new JSONObject();
-            requestBody.put("type", selectedType);
-            requestBody.put("format", selectedFormat);
-            requestBody.put("name", nameInput.getText().toString().trim());
-            requestBody.put("device_id", deviceId);
+            GeneratedDocumentWriter.WrittenDocument written = documentWriter.write(generatedText, selectedFormat, outputBaseName);
+            File file = written.getFile();
+            currentFilePath = file.getAbsolutePath();
+            currentTextResult = generatedText;
 
-            // Common fields
-            if (!addNotesInput.getText().toString().trim().isEmpty()) {
-                requestBody.put("additional_notes", addNotesInput.getText().toString().trim());
-            }
+            GeneratedDocument item = new GeneratedDocument(
+                    UUID.randomUUID().toString(),
+                    sourceJobId,
+                    sourceJobTitle,
+                    sourceCompany,
+                    selectedType,
+                    selectedFormat,
+                    file.getName(),
+                    file.getAbsolutePath(),
+                    System.currentTimeMillis()
+            );
+            documentStore.save(item);
 
-            // CV specific fields
-            if (selectedType.equals("cv")) {
-                requestBody.put("position", positionInput.getText().toString().trim());
-                if (!educationInput.getText().toString().trim().isEmpty()) {
-                    requestBody.put("education", educationInput.getText().toString().trim());
-                }
-                if (!experienceInput.getText().toString().trim().isEmpty()) {
-                    requestBody.put("experience", experienceInput.getText().toString().trim());
-                }
-                if (!skillsInput.getText().toString().trim().isEmpty()) {
-                    requestBody.put("skills", skillsInput.getText().toString().trim());
-                }
-            }
-            // Cover letter specific fields
-            else {
-                requestBody.put("company", companyInput.getText().toString().trim());
-                requestBody.put("position", positionApplyingInput.getText().toString().trim());
-                requestBody.put("tone", selectedTone);
-                if (!experienceSummaryInput.getText().toString().trim().isEmpty()) {
-                    requestBody.put("experience", experienceSummaryInput.getText().toString().trim());
-                }
-            }
+            String docType = ARG_CV_TYPE.equals(selectedType) ? "CV/Resume" : "Cover Letter";
+            StringBuilder result = new StringBuilder();
+            result.append("✅ GENERATION SUCCESSFUL\n\n");
+            result.append("Document: ").append(docType).append(" (" ).append(selectedFormat.toUpperCase()).append(")\n");
+            result.append("Saved: ").append(file.getName()).append("\n");
+            result.append("Path: ").append(file.getAbsolutePath());
+            result.append("\n\n").append(generatedText);
 
-            Log.d(TAG, "Sending request: " + requestBody.toString());
-
-            // Use the non-deprecated method for creating RequestBody
-            RequestBody body = RequestBody.create(requestBody.toString(), JSON);
-
-            Request request = new Request.Builder()
-                    .url(API_URL)
-                    .post(body)
-                    .addHeader("Content-Type", "application/json")
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    requireActivity().runOnUiThread(() -> {
-                        dismissLoadingDialog();
-                        showResult("❌ REQUEST FAILED\n\nError: " + e.getMessage());
-                        Toast.makeText(getContext(), "Generation failed!", Toast.LENGTH_SHORT).show();
-                    });
-                }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    final String responseBody = response.body().string();
-                    Log.d(TAG, "Response: " + responseBody);
-
-                    requireActivity().runOnUiThread(() -> {
-                        dismissLoadingDialog();
-
-                        if (response.isSuccessful()) {
-                            try {
-                                JSONObject jsonResponse = new JSONObject(responseBody);
-                                handleSuccessResponse(jsonResponse);
-                            } catch (JSONException e) {
-                                showResult("❌ PARSE ERROR\n\nError parsing response: " + e.getMessage());
-                            }
-                        } else {
-                            showResult("❌ SERVER ERROR\n\nError: " + response.code() + " - " + responseBody);
-                        }
-                    });
-                }
-            });
-
-        } catch (JSONException e) {
+            showResult(result.toString());
+            downloadBtn.setVisibility(View.VISIBLE);
             dismissLoadingDialog();
-            showResult("❌ REQUEST ERROR\n\nError creating request: " + e.getMessage());
+            submitBtn.setEnabled(true);
+            Toast.makeText(getContext(), docType + " generated successfully", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            dismissLoadingDialog();
+            submitBtn.setEnabled(true);
+            showResult("❌ FILE ERROR\n\nCould not save generated document: " + e.getMessage());
+            Toast.makeText(requireContext(), "Failed to save generated file", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void handleSuccessResponse(JSONObject response) throws JSONException {
-        StringBuilder result = new StringBuilder();
-        result.append("✅ GENERATION SUCCESSFUL\n\n");
-
-        // Display response details
-        String documentType = selectedType.equals("cv") ? "CV/Resume" : "Cover Letter";
-        result.append("Document: ").append(documentType).append("\n");
-
-        if (response.has("status")) {
-            result.append("Status: ").append(response.getString("status")).append("\n");
-        }
-        if (response.has("format")) {
-            String format = response.getString("format");
-            result.append("Format: ").append(format.toUpperCase()).append("\n");
+    private String buildOutputBaseName() {
+        String typePart = ARG_CV_TYPE.equals(selectedType) ? "CV" : "Cover_Letter";
+        if (sourceJobId != -1 && !sourceJobTitle.isEmpty()) {
+            return typePart + "_" + sourceJobTitle + (sourceCompany.isEmpty() ? "" : "_" + sourceCompany);
         }
 
-        result.append("\n");
-
-        // Reset current results
-        currentFileLink = "";
-        currentTextResult = "";
-
-        if (response.has("file_link")) {
-            currentFileLink = response.getString("file_link");
-            saveGeneratedLink(currentFileLink);
-            result.append("📄 DOWNLOAD LINK:\n").append(currentFileLink).append("\n\n");
-            result.append("✅ Link has been saved to your documents.\n");
-            downloadBtn.setVisibility(View.VISIBLE);
-        } else {
-            downloadBtn.setVisibility(View.GONE);
+        String userName = nameInput.getText().toString().trim().replaceAll("[^a-zA-Z0-9_-]", "_");
+        if (userName.isEmpty()) {
+            return typePart;
         }
 
-        if (response.has("text_result")) {
-            currentTextResult = response.getString("text_result");
-            saveGeneratedText(currentTextResult);
-            result.append("\n📝 GENERATED TEXT:\n").append(currentTextResult).append("\n\n");
-            result.append("✅ Text has been saved and can be copied.");
-        }
-
-        showResult(result.toString());
-        Toast.makeText(getContext(), documentType + " generated successfully!", Toast.LENGTH_LONG).show();
+        return typePart + "_" + userName;
     }
 
     private void showResult(String result) {
         requireActivity().runOnUiThread(() -> {
             resultTextView.setText(result);
             resultsLayout.setVisibility(View.VISIBLE);
-
-            // Simple focus request
-            resultsLayout.requestFocus();
-
-            // Or scroll to bottom of the scroll view
             ScrollView scrollView = requireView().findViewById(R.id.mainScrollView);
             if (scrollView != null) {
-                scrollView.post(() -> {
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                });
+                scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
             }
         });
-       /* resultTextView.setText(result);
-        resultsLayout.setVisibility(View.VISIBLE);
-
-        // Scroll to results
-        resultsLayout.post(() -> {
-            View parent = (View) resultsLayout.getParent();
-            parent.scrollTo(0, resultsLayout.getTop());
-            //parent.scrollTo(0, resultsLayout.getTop());
-        });
-        */
     }
 
     private void copyCurrentTextToClipboard() {
@@ -480,113 +496,46 @@ public class CVGeneratorFragment extends Fragment {
             ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText("Generated Document", currentTextResult);
             clipboard.setPrimaryClip(clip);
-            Toast.makeText(getContext(), "Text copied to clipboard!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getContext(), "No text available to copy", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void downloadCurrentFile() {
-        if (!currentFileLink.isEmpty()) {
-            try {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(currentFileLink));
-                startActivity(browserIntent);
-            } catch (Exception e) {
-                Toast.makeText(getContext(), "Cannot open download link", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Toast.makeText(getContext(), "No download link available", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void saveGeneratedLink(String link) {
-        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        Set<String> links = new HashSet<>(prefs.getStringSet(KEY_GENERATED_LINKS, new HashSet<>()));
-        links.add(link);
-        prefs.edit().putStringSet(KEY_GENERATED_LINKS, links).apply();
-    }
-
-    private void saveGeneratedText(String text) {
-        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        Set<String> texts = new HashSet<>(prefs.getStringSet(KEY_GENERATED_TEXTS, new HashSet<>()));
-        texts.add(text);
-        prefs.edit().putStringSet(KEY_GENERATED_TEXTS, texts).apply();
-    }
-
-    private void showGeneratedDocumentsDialog() {
-        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        Set<String> links = prefs.getStringSet(KEY_GENERATED_LINKS, new HashSet<>());
-        Set<String> texts = prefs.getStringSet(KEY_GENERATED_TEXTS, new HashSet<>());
-
-        if (links.isEmpty() && texts.isEmpty()) {
-            Toast.makeText(getContext(), "No generated documents found", Toast.LENGTH_SHORT).show();
+        if (currentFilePath.isEmpty()) {
+            Toast.makeText(getContext(), "No downloaded file available", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("My Generated Documents");
-
-        StringBuilder message = new StringBuilder();
-
-        if (!links.isEmpty()) {
-            message.append("📄 Download Links (Click to open):\n\n");
-            int linkCount = 1;
-            for (String link : links) {
-                message.append(linkCount).append(". ").append(link).append("\n\n");
-                linkCount++;
-            }
+        File file = new File(currentFilePath);
+        if (!file.exists()) {
+            Toast.makeText(getContext(), "Generated file not found", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if (!texts.isEmpty()) {
-            message.append("📝 Generated Texts:\n\n");
-            int textCount = 1;
-            for (String text : texts) {
-                String displayText = text.length() > 100 ? text.substring(0, 100) + "..." : text;
-                message.append(textCount).append(". ").append(displayText).append("\n\n");
-                textCount++;
-            }
-        }
+        Uri uri = documentWriter.getUriForFile(file);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, documentWriter.getMimeType(selectedFormat));
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        builder.setMessage(message.toString());
-        builder.setPositiveButton("OK", null);
-
-        if (!texts.isEmpty()) {
-            builder.setNeutralButton("Copy Latest Text", (dialog, which) -> {
-                String latestText = texts.iterator().next();
-                ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("Generated Text", latestText);
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(getContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
-            });
-        }
-
-        // Add option to clear all documents
-        builder.setNegativeButton("Clear All", (dialog, which) -> {
-            clearAllDocuments();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // Make links clickable in the dialog
-        TextView textView = dialog.findViewById(android.R.id.message);
-        if (textView != null) {
-            textView.setAutoLinkMask(Linkify.WEB_URLS);
-            textView.setMovementMethod(LinkMovementMethod.getInstance());
+        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(requireContext(), "No app found to open this file", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void clearAllDocuments() {
-        SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit()
-                .remove(KEY_GENERATED_LINKS)
-                .remove(KEY_GENERATED_TEXTS)
-                .apply();
-        Toast.makeText(getContext(), "All documents cleared", Toast.LENGTH_SHORT).show();
+    private void openLibrary() {
+        if (isAdded()) {
+            Navigation.findNavController(requireView()).navigate(R.id.nav_documents);
+        }
     }
 
     private void showLoadingDialog(String message) {
-        if (getContext() == null) return;
+        if (getContext() == null) {
+            return;
+        }
 
         if (loadingDialog != null && loadingDialog.isShowing()) {
             loadingDialog.dismiss();
@@ -614,13 +563,14 @@ public class CVGeneratorFragment extends Fragment {
                     public void onAdLoaded(@NonNull RewardedAd ad) {
                         dismissLoadingDialog();
                         rewardedAd = ad;
+                        pendingGenerateAfterAd = true;
                         showRewardedAdRewarded();
                     }
 
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         dismissLoadingDialog();
-                        Toast.makeText(getContext(), "Ad failed to load. Generating your document...", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Ad failed to load. Generating document...", Toast.LENGTH_SHORT).show();
                         generateDocument();
                     }
                 });
@@ -628,27 +578,48 @@ public class CVGeneratorFragment extends Fragment {
 
     private void showRewardedAdRewarded() {
         if (rewardedAd != null && getActivity() != null) {
-            rewardedAd.show(getActivity(), rewardItem -> {
-                // Reward the user and generate document
-                int rewardAmount = rewardItem.getAmount();
-                String rewardType = rewardItem.getType();
-                Log.d(TAG, "Rewarded ad completed. Reward: " + rewardAmount + " " + rewardType);
+            rewardedAd.setFullScreenContentCallback(new com.google.android.gms.ads.FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    generateAfterAd();
+                }
 
-                // After ad is completed, generate document
-                generateDocument();
+                @Override
+                public void onAdFailedToShowFullScreenContent(com.google.android.gms.ads.AdError adError) {
+                    generateAfterAd();
+                }
+            });
+            rewardedAd.show(getActivity(), rewardItem -> {
+                generateAfterAd();
             });
         } else {
-            Toast.makeText(getContext(), "Ad not available. Generating your document...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Ad not available. Generating document...", Toast.LENGTH_SHORT).show();
             generateDocument();
         }
+    }
+
+    private void generateAfterAd() {
+        if (!pendingGenerateAfterAd) {
+            return;
+        }
+        pendingGenerateAfterAd = false;
+        generateDocument();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Clean up resources
         if (loadingDialog != null && loadingDialog.isShowing()) {
             loadingDialog.dismiss();
+        }
+    }
+
+    private void setTextIfAbsent(EditText editText, String value) {
+        if (editText == null) {
+            return;
+        }
+        if (value != null && !value.trim().isEmpty()) {
+            editText.setText(value);
         }
     }
 }

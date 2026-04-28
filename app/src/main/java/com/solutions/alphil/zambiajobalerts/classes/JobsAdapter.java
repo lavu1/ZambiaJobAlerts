@@ -37,6 +37,8 @@ public class JobsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public interface OnJobClickListener {
         void onJobClick(Job job);
+        default void onGenerateCv(Job job) {}
+        default void onGenerateCoverLetter(Job job) {}
     }
 
     public JobsAdapter(List<Object> displayItems, OnJobClickListener listener) {
@@ -106,6 +108,8 @@ public class JobsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView tvTitle, tvExcerpt, tvDate, tvCompany, tvLocation, tvJobType;
         ImageView ivImage;
         Button btnApplyNow, btnShare, btnDetails;
+        Button btnGenerateCv;
+        Button btnGenerateCoverLetter;
 
         JobViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -120,9 +124,11 @@ public class JobsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             btnApplyNow = itemView.findViewById(R.id.btnApplyNow);
             btnShare = itemView.findViewById(R.id.btnShare);
             btnDetails = itemView.findViewById(R.id.btnDetails);
+            btnGenerateCv = itemView.findViewById(R.id.btnGenerateCv);
+            btnGenerateCoverLetter = itemView.findViewById(R.id.btnGenerateCoverLetter);
         }
 
-        void bind(Job job,OnJobClickListener listener) {
+        void bind(Job job, OnJobClickListener listener) {
             tvTitle.setText(job.getTitle());
             tvExcerpt.setText(job.getExcerpt());
             tvDate.setText(job.getFormattedDate());
@@ -174,6 +180,16 @@ public class JobsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             btnDetails.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onJobClick(job);
+                }
+            });
+            btnGenerateCv.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onGenerateCv(job);
+                }
+            });
+            btnGenerateCoverLetter.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onGenerateCoverLetter(job);
                 }
             });
             itemView.setOnClickListener(v -> {

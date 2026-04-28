@@ -47,7 +47,7 @@ public class JobRepository {
         if (Boolean.TRUE.equals(isRefreshing.getValue())) return;
         isRefreshing.setValue(true);
 
-        String url = "https://zambiajobalerts.com/wp-json/wp/v2/job-listings?per_page=30&_embed";
+        String url = ApiConfig.WP_JOB_LISTINGS_URL + "?per_page=30&_embed";
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -92,14 +92,14 @@ public class JobRepository {
             if (localJob != null) {
                 listener.onResponse(localJob);
             } else {
-                String url = "https://zambiajobalerts.com/wp-json/wp/v2/job-listings/" + jobId + "?_embed";
+                String url = ApiConfig.WP_JOB_LISTINGS_URL + "/" + jobId + "?_embed";
                 fetchJobFromUrl(url, listener);
             }
         });
     }
 
     public void fetchJobDetailsBySlug(String slug, ResponseListener<JobEntity> listener) {
-        String url = "https://zambiajobalerts.com/wp-json/wp/v2/job-listings?slug=" + slug + "&_embed";
+        String url = ApiConfig.WP_JOB_LISTINGS_URL + "?slug=" + slug + "&_embed";
         fetchJobFromUrl(url, new ResponseListener<List<JobEntity>>() {
             @Override
             public void onResponse(List<JobEntity> result) {
