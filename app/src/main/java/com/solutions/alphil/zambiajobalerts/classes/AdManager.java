@@ -1,6 +1,8 @@
 package com.solutions.alphil.zambiajobalerts.classes;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -27,8 +29,14 @@ public class AdManager {
     }
 
     public void loadInterstitialAd(Context context) {
+        Context appContext = context.getApplicationContext();
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            new Handler(Looper.getMainLooper()).post(() -> loadInterstitialAd(appContext));
+            return;
+        }
+
         AdRequest adRequest = new AdRequest.Builder().build();
-        InterstitialAd.load(context, INTERSTITIAL_AD_UNIT_ID, adRequest,
+        InterstitialAd.load(appContext, INTERSTITIAL_AD_UNIT_ID, adRequest,
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {

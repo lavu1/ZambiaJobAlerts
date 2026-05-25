@@ -13,8 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.android.gms.ads.AdLoader;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.nativead.NativeAd;
 import com.solutions.alphil.zambiajobalerts.R;
 import com.solutions.alphil.zambiajobalerts.classes.GeneratedDocument;
 import com.solutions.alphil.zambiajobalerts.classes.GeneratedDocumentStore;
@@ -29,11 +32,14 @@ public class DocumentLibraryFragment extends Fragment {
     private androidx.recyclerview.widget.RecyclerView rvDocuments;
     private android.widget.TextView tvEmpty;
     private android.widget.Button btnClearAll;
-    private AdView adView;
 
     private GeneratedDocumentStore store;
     private GeneratedDocumentWriter writer;
     private GeneratedDocumentAdapter adapter;
+    private NativeAd documentNativeAd;
+    private AdLoader adLoader;
+    private static final String NATIVE_AD_UNIT_ID = "ca-app-pub-2168080105757285/5207161115";
+    private final GeneratedDocumentAdapter.BannerItem bannerItem = new GeneratedDocumentAdapter.BannerItem();
 
     @Nullable
     @Override
@@ -52,7 +58,6 @@ public class DocumentLibraryFragment extends Fragment {
         rvDocuments = view.findViewById(R.id.rvGeneratedDocuments);
         tvEmpty = view.findViewById(R.id.tvEmptyState);
         btnClearAll = view.findViewById(R.id.btnClearAll);
-        adView = view.findViewById(R.id.adViewDocumentLibrary);
 
         rvDocuments.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new GeneratedDocumentAdapter(new GeneratedDocumentAdapter.OnDocumentActionListener() {
@@ -74,15 +79,32 @@ public class DocumentLibraryFragment extends Fragment {
             Toast.makeText(requireContext(), "Library cleared", Toast.LENGTH_SHORT).show();
         });
 
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
-
+        initializeNativeAd();
         loadDocuments();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (documentNativeAd != null) {
+            documentNativeAd.destroy();
+            documentNativeAd = null;
+        }
+        adLoader = null;
     }
 
     private void loadDocuments() {
         List<GeneratedDocument> documents = store.getAll();
-        adapter.submitList(documents);
+        List<Object> items = new ArrayList<>();
+        if (documentNativeAd != null) {
+            items.add(documentNativeAd);
+        }
+        items.add(bannerItem);
+        if (documents != null && !documents.isEmpty()) {
+            items.addAll(documents);
+        }
+
+        adapter.submitList(items);
 
         if (documents == null || documents.isEmpty()) {
             rvDocuments.setVisibility(View.GONE);
@@ -93,6 +115,29 @@ public class DocumentLibraryFragment extends Fragment {
             tvEmpty.setVisibility(View.GONE);
             btnClearAll.setEnabled(true);
         }
+    }
+
+    private void initializeNativeAd() {
+        adLoader = new AdLoader.Builder(requireContext(), NATIVE_AD_UNIT_ID)
+                .forNativeAd(nativeAd -> {
+                    if (!isAdded() || getView() == null) {
+                        nativeAd.destroy();
+                        return;
+                    }
+                    if (documentNativeAd != null) {
+                        documentNativeAd.destroy();
+                    }
+                    documentNativeAd = nativeAd;
+                    loadDocuments();
+                })
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError loadAdError) {
+                        // Keep banner-only layout if native ad fails to load.
+                    }
+                })
+                .build();
+        adLoader.loadAds(new AdRequest.Builder().build(), 1);
     }
 
     private void openGeneratedDocument(GeneratedDocument document) {

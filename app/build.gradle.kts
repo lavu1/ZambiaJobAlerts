@@ -12,8 +12,8 @@ android {
         applicationId = "com.solutions.alphil.zambiajobalerts"
         minSdk = 28
         targetSdk = 37
-        versionCode = 20
-        versionName = "1.2.12.20"
+        versionCode = 25
+        versionName = "1.2.12.25"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.review)
     implementation(libs.review.ktx)
     implementation(libs.installreferrer)
+    implementation(libs.app.update)
 
     implementation (platform(libs.firebase.bom))
     implementation (libs.firebase.auth)

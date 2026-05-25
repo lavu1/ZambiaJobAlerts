@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -63,6 +64,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             String message = data.get("message");
             String company = data.get("company");
             String location = data.get("location");
+            String link = firstNonEmpty(data.get("deep_link"), data.get("deeplink"), data.get("link"), data.get("url"));
 
             if (title == null && remoteMessage.getNotification() != null) {
                 title = remoteMessage.getNotification().getTitle();
@@ -74,11 +76,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (title == null) title = "New Job Alert!";
             if (message == null) message = "Tap to view job details";
 
-            showNotification(title, message, jobId, type, company, location, jobSlug);
+            showNotification(title, message, jobId, type, company, location, jobSlug, link);
         } else if (remoteMessage.getNotification() != null) {
             showNotification(
                     remoteMessage.getNotification().getTitle(),
                     remoteMessage.getNotification().getBody(),
+                    null,
                     null,
                     null,
                     null,
@@ -96,22 +99,40 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void showNotification(String title, String body, String jobId, String type, String company, String location, String jobSlug) {
+    private void showNotification(String title, String body, String jobId, String type, String company, String location, String jobSlug, String link) {
         try {
             createNotificationChannel();
 
+            if (title == null || title.trim().isEmpty()) {
+                title = "Zambia Job Alerts";
+            }
+            if (body == null || body.trim().isEmpty()) {
+                body = "Tap to open Zambia Job Alerts";
+            }
+
             Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
             if (jobId != null) {
                 try {
                     intent.putExtra("job_id", Integer.parseInt(jobId));
                 } catch (NumberFormatException e) {
-                    Log.e(TAG, "Invalid job ID: " + jobId);
+                    intent.putExtra("job_id", jobId);
+                    Log.d(TAG, "Using non-numeric job identifier: " + jobId);
                 }
             }
             if (jobSlug != null && !jobSlug.isEmpty()) {
                 intent.putExtra("job_slug", jobSlug);
+            }
+            if (link != null && !link.isEmpty()) {
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(normalizeLaunchUrl(link)));
+                intent.putExtra("link", link);
+            }
+            if ((jobId == null || jobId.isEmpty())
+                    && (jobSlug == null || jobSlug.isEmpty())
+                    && (link == null || link.isEmpty())) {
+                intent.putExtra("open_home", true);
             }
             if (type != null) {
                 try {
@@ -121,7 +142,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 }
             }
 
-            int requestCode = (int) System.currentTimeMillis();
+            int requestCode = buildRequestCode(jobId, jobSlug, link);
             PendingIntent pendingIntent = PendingIntent.getActivity(
                     this,
                     requestCode,
@@ -169,6 +190,32 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (Exception e) {
             Log.e(TAG, "Error showing notification", e);
         }
+    }
+
+    private int buildRequestCode(String jobId, String jobSlug, String link) {
+        String stableKey = firstNonEmpty(jobId, jobSlug, link);
+        if (stableKey != null) {
+            return stableKey.hashCode();
+        }
+        return (int) System.currentTimeMillis();
+    }
+
+    private String firstNonEmpty(String... values) {
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty()) {
+                return value.trim();
+            }
+        }
+        return null;
+    }
+
+    private String normalizeLaunchUrl(String value) {
+        String trimmedValue = value.trim();
+        if (trimmedValue.startsWith("zambiajobalerts.com")
+                || trimmedValue.startsWith("www.zambiajobalerts.com")) {
+            return "https://" + trimmedValue;
+        }
+        return trimmedValue;
     }
 
     private void createNotificationChannel() {

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.fragment.app.FragmentActivity;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.ads.AdError;
@@ -148,7 +149,7 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
 
     private void onJobLoaded(JobEntity result) {
         currentJob = Job.fromEntity(result);
-        requireActivity().runOnUiThread(() -> {
+        runOnActiveUiThread(() -> {
             displayJobDetails(currentJob);
             updateSaveButtonState(currentJob.getId());
             binding.progressBar.setVisibility(View.GONE);
@@ -158,9 +159,26 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
     }
 
     private void onLoadError(String error) {
-        requireActivity().runOnUiThread(() -> {
+        runOnActiveUiThread(() -> {
             binding.progressBar.setVisibility(View.GONE);
-            Toast.makeText(getContext(), "Offline: " + error, Toast.LENGTH_SHORT).show();
+            Context context = getContext();
+            if (context != null) {
+                Toast.makeText(context, "Offline: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void runOnActiveUiThread(@NonNull Runnable action) {
+        FragmentActivity activity = getActivity();
+        if (activity == null || binding == null) {
+            return;
+        }
+
+        activity.runOnUiThread(() -> {
+            if (!isAdded() || binding == null) {
+                return;
+            }
+            action.run();
         });
     }
 
@@ -215,8 +233,13 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
     }
 
     private void showInterstitialAdOnceAfterJobLoaded() {
+        FragmentActivity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
         if (!AdManager.getInstance().isInterstitialAdLoaded()) {
-            AdManager.getInstance().loadInterstitialAd(requireContext());
+            loadNextInterstitialAd();
             return;
         }
 
@@ -229,30 +252,43 @@ public class JobDetailsBottomSheet extends BottomSheetDialogFragment {
             @Override
             public void onAdDismissedFullScreenContent() {
                 AdManager.getInstance().clearInterstitialAd();
-                AdManager.getInstance().loadInterstitialAd(requireContext());
+                loadNextInterstitialAd();
             }
 
             @Override
             public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                 AdManager.getInstance().clearInterstitialAd();
-                AdManager.getInstance().loadInterstitialAd(requireContext());
+                loadNextInterstitialAd();
             }
         });
 
-        interstitialAd.show(requireActivity());
+        interstitialAd.show(activity);
+    }
+
+    private void loadNextInterstitialAd() {
+        Context context = getContext();
+        if (context != null) {
+            AdManager.getInstance().loadInterstitialAd(context);
+        }
     }
 
     private void showRewardedAdOnceAfterJobLoaded() {
+        Context context = getContext();
+        if (context == null) {
+            return;
+        }
+
         AdRequest adRequest = new AdRequest.Builder().build();
-        RewardedAd.load(requireContext(), REWARDED_AD_UNIT_ID, adRequest,
+        RewardedAd.load(context, REWARDED_AD_UNIT_ID, adRequest,
                 new RewardedAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
-                        if (!isAdded() || getActivity() == null) {
+                        FragmentActivity activity = getActivity();
+                        if (!isAdded() || binding == null || activity == null) {
                             return;
                         }
 
-                        rewardedAd.show(requireActivity(), rewardItem -> {
+                        rewardedAd.show(activity, rewardItem -> {
                             // No reward action is needed here. The ad is only used after deep-link job loading.
                         });
                     }

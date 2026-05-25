@@ -1,6 +1,7 @@
 package com.solutions.alphil.zambiajobalerts;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -19,6 +20,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
@@ -42,6 +46,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -53,6 +58,12 @@ import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.review.model.ReviewErrorCode;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.appupdate.AppUpdateOptions;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.UpdateAvailability;
 import com.solutions.alphil.zambiajobalerts.classes.JobDetailsBottomSheet;
 import com.solutions.alphil.zambiajobalerts.databinding.ActivityMainBinding;
 import com.solutions.alphil.zambiajobalerts.ui.aigenerate.CVGeneratorFragment;
@@ -65,11 +76,11 @@ import com.solutions.alphil.zambiajobalerts.ui.savedjobs.SavedJobsReminderWorker
 import com.solutions.alphil.zambiajobalerts.ui.services.ServicesFragment;
 import com.solutions.alphil.zambiajobalerts.ui.slideshow.SlideshowFragment;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1001;
@@ -84,18 +95,33 @@ public class MainActivity extends AppCompatActivity {
     private static final String AD_UNIT_ID = "ca-app-pub-2168080105757285/4046795138";
     private static final String PREFS_NAMEC = "app_prefs";
     private static final String KEY_APP_OPENS = "app_opens";
+    private String pendingJobIdentifier;
+    private boolean pendingJobOpenedFromDeepLink;
+    private boolean pendingOpenHome;
+    private AppUpdateManager appUpdateManager;
+    private boolean updateFlowStarted;
+    private final ActivityResultLauncher<IntentSenderRequest> appUpdateLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartIntentSenderForResult(),
+                    result -> {
+                        updateFlowStarted = false;
+                        if (result.getResultCode() != Activity.RESULT_OK) {
+                            Log.i(TAG, "Immediate app update flow ended with result code: " + result.getResultCode());
+                        }
+                    }
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (!isNetworkAvailable()) {
-            Toast.makeText(this, "You are not connected to the internet", Toast.LENGTH_SHORT).show();
-            System.exit(0);
+            Toast.makeText(this, "You are not connected to the internet. Some content may be unavailable.", Toast.LENGTH_SHORT).show();
         }
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        appUpdateManager = AppUpdateManagerFactory.create(this);
 
         ReviewManager manager = ReviewManagerFactory.create(this);
         Task<ReviewInfo> request = manager.requestReviewFlow();
@@ -129,11 +155,11 @@ public class MainActivity extends AppCompatActivity {
 
         createNotificationChannel();
         setupHamburgerMenu();
-        checkNotificationPermission();
 
-        handleNotificationIntent(getIntent());
-        handleDeepLink(getIntent());
-        checkNotificationPermission();
+        boolean handledLaunch = savedInstanceState == null && queueLaunch(getIntent());
+        if (!handledLaunch) {
+            checkNotificationPermission();
+        }
         scheduleSavedJobsReminder();
     }
 
@@ -141,8 +167,56 @@ public class MainActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        handleDeepLink(intent);
+        queueLaunch(intent);
+        processPendingLaunch();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkForImmediateAppUpdate();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        processPendingLaunch();
+    }
+
+    private void checkForImmediateAppUpdate() {
+        if (appUpdateManager == null || updateFlowStarted || isFinishing() || isDestroyed()) {
+            return;
+        }
+
+        appUpdateManager.getAppUpdateInfo()
+                .addOnSuccessListener(appUpdateInfo -> {
+                    if (appUpdateInfo.updateAvailability()
+                            == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                        startImmediateUpdate(appUpdateInfo);
+                    } else if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                            && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                        startImmediateUpdate(appUpdateInfo);
+                    }
+                })
+                .addOnFailureListener(error -> Log.d(TAG, "Unable to check for app update", error));
+    }
+
+    private void startImmediateUpdate(AppUpdateInfo appUpdateInfo) {
+        if (updateFlowStarted || isFinishing() || isDestroyed()) {
+            return;
+        }
+
+        updateFlowStarted = appUpdateManager.startUpdateFlowForResult(
+                appUpdateInfo,
+                appUpdateLauncher,
+                AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+        );
+
+        if (!updateFlowStarted) {
+            Log.d(TAG, "Immediate app update flow was not started");
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -168,6 +242,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Notifications are disabled. You may be asked again next time you open the app.", Toast.LENGTH_SHORT).show();
             }
         }
+
+        processPendingLaunch();
     }
 
     private void scheduleSavedJobsReminder() {
@@ -190,26 +266,6 @@ public class MainActivity extends AppCompatActivity {
             return activeNetwork != null && activeNetwork.isConnected();
         }
         return false;
-    }
-
-    private void handleDeepLink(Intent intent) {
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
-            Uri data = intent.getData();
-            String path = data.getPath();
-
-            if (path != null && (path.startsWith("/job/") || path.startsWith("/jobs/"))) {
-                String prefix = path.startsWith("/jobs/") ? "/jobs/" : "/job/";
-                String identifier = path.substring(prefix.length()).replaceAll("/", "");
-                if (!identifier.isEmpty()) {
-                    // Open the job first. JobDetailsBottomSheet will show one rewarded ad after the job has loaded.
-                    navigateToJobDetails(identifier, true);
-                }
-            }
-        }
-    }
-
-    private void navigateToJobDetails(String identifier) {
-        navigateToJobDetails(identifier, false);
     }
 
     private void navigateToJobDetails(String identifier, boolean openedFromDeepLink) {
@@ -318,22 +374,209 @@ public class MainActivity extends AppCompatActivity {
         }
     }*/
 
-    private void handleNotificationIntent(Intent intent) {
-        if (intent == null) {
+    private boolean queueLaunch(Intent intent) {
+        LaunchRequest request = parseLaunchRequest(intent);
+        if (request == null) {
+            return false;
+        }
+
+        pendingOpenHome = request.openHome;
+        pendingJobIdentifier = request.identifier;
+        pendingJobOpenedFromDeepLink = request.openedFromDeepLink;
+        clearJobLaunchMarkers(intent);
+        return true;
+    }
+
+    private void processPendingLaunch() {
+        if ((pendingJobIdentifier == null && !pendingOpenHome) || isFinishing() || isDestroyed()) {
             return;
+        }
+
+        if (getSupportFragmentManager().isStateSaved()) {
+            binding.getRoot().post(this::processPendingLaunch);
+            return;
+        }
+
+        if (pendingOpenHome) {
+            pendingOpenHome = false;
+            pendingJobIdentifier = null;
+            pendingJobOpenedFromDeepLink = false;
+            navigateHome();
+            return;
+        }
+
+        String identifier = pendingJobIdentifier;
+        boolean openedFromDeepLink = pendingJobOpenedFromDeepLink;
+        pendingJobIdentifier = null;
+        pendingJobOpenedFromDeepLink = false;
+
+        navigateToJobDetails(identifier, openedFromDeepLink);
+    }
+
+    private LaunchRequest parseLaunchRequest(Intent intent) {
+        if (intent == null) {
+            return null;
+        }
+
+        if (Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
+            LaunchRequest request = parseUriLaunch(intent.getData(), true);
+            if (request != null) {
+                return request;
+            }
         }
 
         String jobSlug = intent.getStringExtra("job_slug");
         if (jobSlug != null && !jobSlug.isEmpty()) {
-            navigateToJobDetails(jobSlug, false);
+            return LaunchRequest.forJob(jobSlug, false);
+        }
+
+        String jobIdentifier = readJobIdentifierExtra(intent);
+        if (jobIdentifier != null) {
+            return LaunchRequest.forJob(jobIdentifier, false);
+        }
+
+        String launchUrl = firstNonEmptyExtra(intent, "deep_link", "deeplink", "link", "url");
+        if (launchUrl != null) {
+            LaunchRequest request = parseUriLaunch(Uri.parse(normalizeLaunchUrl(launchUrl)), true);
+            if (request != null) {
+                return request;
+            }
+        }
+
+        if (intent.getBooleanExtra("open_home", false)) {
+            return LaunchRequest.forHome();
+        }
+
+        return null;
+    }
+
+    private LaunchRequest parseUriLaunch(Uri data, boolean openedFromDeepLink) {
+        if (data == null) {
+            return null;
+        }
+
+        if (JobLaunchParser.isHomeUri(data.getScheme(), data.getHost(), data.getPath())) {
+            return LaunchRequest.forHome();
+        }
+
+        String identifier = JobLaunchParser.extractIdentifier(
+                data.getScheme(),
+                data.getHost(),
+                data.getPath()
+        );
+        if (identifier != null && !identifier.isEmpty()) {
+            return LaunchRequest.forJob(identifier, openedFromDeepLink);
+        }
+
+        return null;
+    }
+
+    private void navigateHome() {
+        Fragment existingJobDetails = getSupportFragmentManager().findFragmentByTag("JobDetails");
+        if (existingJobDetails instanceof DialogFragment) {
+            ((DialogFragment) existingJobDetails).dismissAllowingStateLoss();
+        }
+
+        if (navController != null) {
+            if (!navController.popBackStack(R.id.nav_home, false)) {
+                navController.navigate(R.id.nav_home);
+            }
+        } else {
+            loadFragment(new HomeFragment(), "Home");
+        }
+    }
+
+    private String readJobIdentifierExtra(Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras == null) {
+            return null;
+        }
+
+        String identifier = readNonEmptyExtra(extras, "open_job_id");
+        if (identifier != null && !"-1".equals(identifier)) {
+            return identifier;
+        }
+
+        identifier = readNonEmptyExtra(extras, "job_id");
+        if (identifier != null && !"-1".equals(identifier)) {
+            return identifier;
+        }
+
+        return null;
+    }
+
+    private String firstNonEmptyExtra(Intent intent, String... keys) {
+        Bundle extras = intent.getExtras();
+        if (extras == null) {
+            return null;
+        }
+
+        for (String key : keys) {
+            String value = readNonEmptyExtra(extras, key);
+            if (value != null) {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private String readNonEmptyExtra(Bundle extras, String key) {
+        Object value = extras.get(key);
+        if (value == null) {
+            return null;
+        }
+
+        String text = String.valueOf(value).trim();
+        return text.isEmpty() ? null : text;
+    }
+
+    private String normalizeLaunchUrl(String value) {
+        String trimmedValue = value.trim();
+        if (trimmedValue.startsWith("zambiajobalerts.com")
+                || trimmedValue.startsWith("www.zambiajobalerts.com")) {
+            return "https://" + trimmedValue;
+        }
+        return trimmedValue;
+    }
+
+    private void clearJobLaunchMarkers(Intent intent) {
+        if (intent == null) {
             return;
         }
 
-        if (intent.hasExtra("open_job_id") || intent.hasExtra("job_id")) {
-            int jobId = intent.getIntExtra("open_job_id", intent.getIntExtra("job_id", -1));
-            if (jobId != -1) {
-                navigateToJobDetails(String.valueOf(jobId), false);
-            }
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.setData(null);
+        }
+
+        intent.removeExtra("job_slug");
+        intent.removeExtra("open_job_id");
+        intent.removeExtra("job_id");
+        intent.removeExtra("deep_link");
+        intent.removeExtra("deeplink");
+        intent.removeExtra("link");
+        intent.removeExtra("url");
+        intent.removeExtra("open_home");
+    }
+
+    private static final class LaunchRequest {
+        private final String identifier;
+        private final boolean openedFromDeepLink;
+        private final boolean openHome;
+
+        private LaunchRequest(String identifier, boolean openedFromDeepLink, boolean openHome) {
+            this.identifier = identifier;
+            this.openedFromDeepLink = openedFromDeepLink;
+            this.openHome = openHome;
+        }
+
+        private static LaunchRequest forJob(String identifier, boolean openedFromDeepLink) {
+            return new LaunchRequest(identifier, openedFromDeepLink, false);
+        }
+
+        private static LaunchRequest forHome() {
+            return new LaunchRequest(null, false, true);
         }
     }
 

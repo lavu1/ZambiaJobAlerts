@@ -23,6 +23,8 @@ public class JobsViewModel extends AndroidViewModel {
     private final MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private final MutableLiveData<Boolean> hasMoreData = new MutableLiveData<>(true);
     private final MutableLiveData<Job> jobDetailsLiveData = new MutableLiveData<>();
+    private int currentPage = 0;
+    private volatile boolean requestInFlight = false;
 
     public JobsViewModel(@NonNull Application application) {
         super(application);
@@ -56,13 +58,13 @@ public class JobsViewModel extends AndroidViewModel {
     public LiveData<Job> getJobDetails() { return jobDetailsLiveData; }
 
     public void refreshJobs() {
-        loadingLiveData.setValue(true);
-        repository.refreshJobs();
-        loadingLiveData.postValue(false);
+        loadPage(1);
     }
 
     public void loadJobs(boolean forceRefresh) {
-        refreshJobs();
+        if (forceRefresh || currentPage == 0) {
+            refreshJobs();
+        }
     }
 
     public void loadLimitedJobs(int limit) {
@@ -74,7 +76,40 @@ public class JobsViewModel extends AndroidViewModel {
     }
     
     public void loadMoreJobs() {
-        refreshJobs();
+        Boolean hasMore = hasMoreData.getValue();
+        if (Boolean.FALSE.equals(hasMore)) {
+            return;
+        }
+
+        int nextPage = currentPage < 1 ? 1 : currentPage + 1;
+        loadPage(nextPage);
+    }
+
+    private void loadPage(int page) {
+        if (requestInFlight) {
+            return;
+        }
+
+        requestInFlight = true;
+        loadingLiveData.setValue(true);
+        errorLiveData.setValue(null);
+
+        repository.loadJobsPage(page, JobRepository.DEFAULT_PAGE_SIZE, new JobRepository.ResponseListener<JobRepository.JobsPageResult>() {
+            @Override
+            public void onResponse(JobRepository.JobsPageResult result) {
+                currentPage = result.getPage();
+                hasMoreData.postValue(result.hasMore());
+                loadingLiveData.postValue(false);
+                requestInFlight = false;
+            }
+
+            @Override
+            public void onError(String error) {
+                errorLiveData.postValue(error);
+                loadingLiveData.postValue(false);
+                requestInFlight = false;
+            }
+        });
     }
 
     public void fetchJobDetails(int jobId) {
