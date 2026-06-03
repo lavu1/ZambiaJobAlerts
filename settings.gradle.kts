@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Zambia Job Alerts"
 include(":app")
+include(":shared")

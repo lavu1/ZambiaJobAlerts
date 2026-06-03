@@ -1,37 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/nav_home">
 
     <fragment
         android:id="@+id/nav_home"
         android:name="com.solutions.alphil.zambiajobalerts.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:label="@string/menu_home" />
 
     <fragment
         android:id="@+id/nav_gallery"
         android:name="com.solutions.alphil.zambiajobalerts.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:label="@string/menu_gallery" />
 
     <fragment
         android:id="@+id/nav_slideshow"
         android:name="com.solutions.alphil.zambiajobalerts.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:label="@string/menu_slideshow" />
     <fragment
         android:id="@+id/nav_rewards"
         android:name="com.solutions.alphil.zambiajobalerts.ui.services.ServicesFragment"
-        android:label="Services"
-        tools:layout="@layout/fragment_services" />
+        android:label="Services" />
     <fragment
         android:id="@+id/nav_ai"
         android:name="com.solutions.alphil.zambiajobalerts.ui.aigenerate.CVGeneratorFragment"
-        android:label="@string/menu_aiServices"
-        tools:layout="@layout/fragment_cv_generator">
+        android:label="@string/menu_aiServices">
         <argument
             android:name="source_job_id"
             app:argType="integer"
@@ -53,71 +47,64 @@
     <fragment
         android:id="@+id/nav_documents"
         android:name="com.solutions.alphil.zambiajobalerts.ui.aigenerate.DocumentLibraryFragment"
-        android:label="@string/menu_documents"
-        tools:layout="@layout/fragment_document_library" />
+        android:label="@string/menu_documents" />
     <fragment
         android:id="@+id/nav_jobs"
         android:name="com.solutions.alphil.zambiajobalerts.ui.jobs.JobsListFragment"
-        android:label="@string/menu_jobs"
-        tools:layout="@layout/fragment_jobs_list">
+        android:label="@string/menu_jobs">
 
         <argument
             android:name="job_id"
             app:argType="integer"
             android:defaultValue="-1" />
+        <argument
+            android:name="search_query"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <fragment
         android:id="@+id/nav_post_job"
         android:name="com.solutions.alphil.zambiajobalerts.ui.postjob.PostJobFragment"
-        android:label="Post a Job"
-        tools:layout="@layout/fragment_post_job" />
+        android:label="Post a Job" />
 
     <fragment
         android:id="@+id/nav_saved_jobs"
         android:name="com.solutions.alphil.zambiajobalerts.ui.savedjobs.SavedJobsFragment"
-        android:label="Saved Jobs"
-        tools:layout="@layout/fragment_saved_jobs" />
+        android:label="Saved Jobs" />
 
     <fragment
         android:id="@+id/nav_email_alerts"
         android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.EmailJobAlertsFragment"
-        android:label="Email Alerts"
-        tools:layout="@layout/fragment_email_job_alerts" />
+        android:label="Email Alerts" />
 
     <fragment
         android:id="@+id/nav_phone_alerts"
         android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.PhoneJobAlertsFragment"
-        android:label="Phone Alerts"
-        tools:layout="@layout/fragment_phone_job_alerts" />
+        android:label="Phone Alerts" />
 
     <fragment
         android:id="@+id/nav_priority_job"
         android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.PriorityJobFragment"
-        android:label="Priority Job"
-        tools:layout="@layout/fragment_priority_job" />
+        android:label="Priority Job" />
 
     <fragment
         android:id="@+id/nav_cv_review"
         android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.CVReviewFragment"
-        android:label="CV Review"
-        tools:layout="@layout/fragment_cv_review" />
+        android:label="CV Review" />
 
     <fragment
         android:id="@+id/nav_cv_write"
         android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.CVWriteFragment"
-        android:label="CV Write"
-        tools:layout="@layout/fragment_cv_write" />
+        android:label="CV Write" />
 
     <fragment
         android:id="@+id/nav_career_coaching"
         android:name="com.solutions.alphil.zambiajobalerts.ui.rewards.CareerCoachingFragment"
-        android:label="Career Coaching"
-        tools:layout="@layout/fragment_career_coaching" />
+        android:label="Career Coaching" />
 
     <fragment
         android:id="@+id/nav_terms"
         android:name="com.solutions.alphil.zambiajobalerts.ui.terms.TermsFragment"
-        android:label="@string/menu_terms"
-        tools:layout="@layout/fragment_terms" />
+        android:label="@string/menu_terms" />
 </navigation>

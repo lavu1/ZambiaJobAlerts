@@ -1,0 +1,6 @@
+framework module Pods_ZambiaJobAlertsIOS {
+  umbrella header "Pods-ZambiaJobAlertsIOS-umbrella.h"
+
+  export *
+  module * { export * }
+}

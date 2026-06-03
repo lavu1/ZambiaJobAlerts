@@ -4,6 +4,7 @@
     <!-- Also add permissions if not present -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -11,6 +12,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <queries>
         <intent>
             <action android:name="android.intent.action.SEND" />
@@ -88,6 +90,10 @@
                     android:scheme="https"
                     android:pathPrefix="/jobs/" />
                 <data
+                    android:host="zambiajobalerts.com"
+                    android:scheme="https"
+                    android:pathPrefix="/" />
+                <data
                     android:host="www.zambiajobalerts.com"
                     android:scheme="https"
                     android:pathPrefix="/job/" />
@@ -95,6 +101,10 @@
                     android:host="www.zambiajobalerts.com"
                     android:scheme="https"
                     android:pathPrefix="/jobs/" />
+                <data
+                    android:host="www.zambiajobalerts.com"
+                    android:scheme="https"
+                    android:pathPrefix="/" />
 
             </intent-filter>
 

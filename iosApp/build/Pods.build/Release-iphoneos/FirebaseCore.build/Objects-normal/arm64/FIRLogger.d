@@ -1,0 +1,8 @@
+dependencies: \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCore.build/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/FirebaseCore/FirebaseCore/Sources/FIRLogger.m \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/FirebaseCore/FirebaseCore/Extension/FIRLogger.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/GoogleUtilities.build/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIRLoggerLevel.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/FirebaseCore/FirebaseCore/Sources/Public/FirebaseCore/FIRVersion.h

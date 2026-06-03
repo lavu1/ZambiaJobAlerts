@@ -1,0 +1,16 @@
+{
+  "" : {
+    "const-values" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/Google-Mobile-Ads-SDK-primary.swiftconstvalues",
+    "dependencies" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/Google-Mobile-Ads-SDK-primary.d",
+    "diagnostics" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/Google-Mobile-Ads-SDK-primary.dia",
+    "emit-module-dependencies" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/Google-Mobile-Ads-SDK-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/Google-Mobile-Ads-SDK-primary-emit-module.dia",
+    "pch" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/Google-Mobile-Ads-SDK-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/Google-Mobile-Ads-SDK-primary.swiftdeps"
+  },
+  "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/Google-Mobile-Ads-SDK/Sources/GoogleMobileAdsPlaceholder.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/GoogleMobileAdsPlaceholder.o",
+    "llvm-bc" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/GoogleMobileAdsPlaceholder.bc",
+    "object" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/Google-Mobile-Ads-SDK.build/Objects-normal/arm64/GoogleMobileAdsPlaceholder.o"
+  }
+}

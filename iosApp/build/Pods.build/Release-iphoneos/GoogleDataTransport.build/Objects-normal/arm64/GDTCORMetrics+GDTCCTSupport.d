@@ -1,0 +1,26 @@
+dependencies: \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/GoogleDataTransport.build/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/GDTCORMetrics+GDTCCTSupport.m \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/Private/GDTCORMetrics+GDTCCTSupport.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Private/GDTCORMetrics.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCOREventDataObject.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORStorageSizeBytes.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/nanopb.build/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/UIKit.framework/Modules/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCORConsoleLogger.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCOREventDropReason.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/Private/GDTCCTNanopbHelpers.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORReachability.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORPlatform.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/SystemConfiguration.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Modules/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCOREvent.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCORTargets.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCORProductData.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/Protogen/nanopb/cct.nanopb.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/Protogen/nanopb/compliance.nanopb.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/Protogen/nanopb/external_privacy_context.nanopb.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/Protogen/nanopb/external_prequest_context.nanopb.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Private/GDTCORLogSourceMetrics.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCCTLibrary/Protogen/nanopb/client_metrics.nanopb.h

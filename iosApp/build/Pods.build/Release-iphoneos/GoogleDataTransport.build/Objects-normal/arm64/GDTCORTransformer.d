@@ -1,0 +1,27 @@
+dependencies: \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/GoogleDataTransport.build/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/GDTCORTransformer.m \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Private/GDTCORTransformer.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/Foundation.framework/Modules/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORLifecycle.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORPlatform.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/SystemConfiguration.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/UIKit.framework/Modules/module.modulemap \
+  /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreTelephony.framework/Modules/module.modulemap \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Private/GDTCORTransformer_Private.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORAssert.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCORConsoleLogger.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORStorageProtocol.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORStorageEventSelector.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCORTargets.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORStorageSizeBytes.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCOREvent.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCOREventDataObject.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCOREventTransformer.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Private/GDTCOREvent_Private.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Public/GoogleDataTransport/GDTCORClock.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Private/GDTCORRegistrar_Private.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORRegistrar.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORMetricsControllerProtocol.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCOREventDropReason.h \
+  /Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/GoogleDataTransport/GoogleDataTransport/GDTCORLibrary/Internal/GDTCORUploader.h

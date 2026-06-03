@@ -1,0 +1,12 @@
+{
+  "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/FirebaseCoreInternal/FirebaseCore/Internal/Sources/HeartbeatLogging/_ObjC_HeartbeatController.swift" : {
+    "abi-baseline-json" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal.abi.json",
+    "const-values" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal-primary.swiftconstvalues",
+    "dependencies" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal-primary.d",
+    "diagnostics" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal-primary.dia",
+    "objc-header" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal-Swift.h",
+    "swiftdoc" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal.swiftdoc",
+    "swiftmodule" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal.swiftmodule",
+    "swiftsourceinfo" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/build/Pods.build/Release-iphoneos/FirebaseCoreInternal.build/Objects-normal/arm64/FirebaseCoreInternal.swiftsourceinfo"
+  }
+}

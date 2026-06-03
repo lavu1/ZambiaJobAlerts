@@ -1,0 +1,527 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100000000000000000000001 /* ZambiaJobAlertsIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000101 /* ZambiaJobAlertsIOSApp.swift */; };
+		100000000000000000000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000102 /* AppDelegate.swift */; };
+		100000000000000000000003 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000103 /* RootView.swift */; };
+		100000000000000000000004 /* AppLaunchStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000104 /* AppLaunchStore.swift */; };
+		100000000000000000000005 /* KMPBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000105 /* KMPBridge.swift */; };
+		100000000000000000000006 /* JobModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000106 /* JobModels.swift */; };
+		100000000000000000000007 /* JobsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000107 /* JobsStore.swift */; };
+		100000000000000000000008 /* AdBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000108 /* AdBootstrap.swift */; };
+		100000000000000000000009 /* AdMobBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000109 /* AdMobBannerView.swift */; };
+		10000000000000000000000A /* InterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000010A /* InterstitialAdManager.swift */; };
+		10000000000000000000000B /* AppOpenAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000010B /* AppOpenAdManager.swift */; };
+		10000000000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000010E /* Assets.xcassets */; };
+		10000000000000000000000D /* NativeAdCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000000000000000000010F /* NativeAdCardView.swift */; };
+		10000000000000000000000E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000110 /* GoogleService-Info.plist */; };
+		E9E9B2B5E3D3B87F2F803786 /* Pods_ZambiaJobAlertsIOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3CB6D0833AC40DABF70ED74 /* Pods_ZambiaJobAlertsIOS.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		100000000000000000000010 /* ZambiaJobAlertsIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZambiaJobAlertsIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		100000000000000000000101 /* ZambiaJobAlertsIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZambiaJobAlertsIOSApp.swift; sourceTree = "<group>"; };
+		100000000000000000000102 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		100000000000000000000103 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		100000000000000000000104 /* AppLaunchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchStore.swift; sourceTree = "<group>"; };
+		100000000000000000000105 /* KMPBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMPBridge.swift; sourceTree = "<group>"; };
+		100000000000000000000106 /* JobModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobModels.swift; sourceTree = "<group>"; };
+		100000000000000000000107 /* JobsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobsStore.swift; sourceTree = "<group>"; };
+		100000000000000000000108 /* AdBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBootstrap.swift; sourceTree = "<group>"; };
+		100000000000000000000109 /* AdMobBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdMobBannerView.swift; sourceTree = "<group>"; };
+		10000000000000000000010A /* InterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterstitialAdManager.swift; sourceTree = "<group>"; };
+		10000000000000000000010B /* AppOpenAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppOpenAdManager.swift; sourceTree = "<group>"; };
+		10000000000000000000010C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		10000000000000000000010D /* ZambiaJobAlertsIOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ZambiaJobAlertsIOS.entitlements; sourceTree = "<group>"; };
+		10000000000000000000010E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		10000000000000000000010F /* NativeAdCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAdCardView.swift; sourceTree = "<group>"; };
+		100000000000000000000110 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		AC6B25E6AB13F2805167F2B8 /* Pods-ZambiaJobAlertsIOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZambiaJobAlertsIOS.debug.xcconfig"; path = "Target Support Files/Pods-ZambiaJobAlertsIOS/Pods-ZambiaJobAlertsIOS.debug.xcconfig"; sourceTree = "<group>"; };
+		F3CB6D0833AC40DABF70ED74 /* Pods_ZambiaJobAlertsIOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ZambiaJobAlertsIOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4966753D02ECF80107C5E27 /* Pods-ZambiaJobAlertsIOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZambiaJobAlertsIOS.release.xcconfig"; path = "Target Support Files/Pods-ZambiaJobAlertsIOS/Pods-ZambiaJobAlertsIOS.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		100000000000000000000020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9E9B2B5E3D3B87F2F803786 /* Pods_ZambiaJobAlertsIOS.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		100000000000000000000030 = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000031 /* ZambiaJobAlertsIOS */,
+				100000000000000000000032 /* Products */,
+				DEA97DB7836A0CE09851617E /* Pods */,
+				DECE67FF024DFF097DFB9D2C /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		100000000000000000000031 /* ZambiaJobAlertsIOS */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000101 /* ZambiaJobAlertsIOSApp.swift */,
+				100000000000000000000102 /* AppDelegate.swift */,
+				100000000000000000000103 /* RootView.swift */,
+				100000000000000000000033 /* Navigation */,
+				100000000000000000000034 /* Shared */,
+				100000000000000000000035 /* Ads */,
+				100000000000000000000036 /* Resources */,
+			);
+			path = ZambiaJobAlertsIOS;
+			sourceTree = "<group>";
+		};
+		100000000000000000000032 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000010 /* ZambiaJobAlertsIOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		100000000000000000000033 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000104 /* AppLaunchStore.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		100000000000000000000034 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000105 /* KMPBridge.swift */,
+				100000000000000000000106 /* JobModels.swift */,
+				100000000000000000000107 /* JobsStore.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		100000000000000000000035 /* Ads */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000108 /* AdBootstrap.swift */,
+				100000000000000000000109 /* AdMobBannerView.swift */,
+				10000000000000000000010A /* InterstitialAdManager.swift */,
+				10000000000000000000010B /* AppOpenAdManager.swift */,
+				10000000000000000000010F /* NativeAdCardView.swift */,
+			);
+			path = Ads;
+			sourceTree = "<group>";
+		};
+		100000000000000000000036 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				10000000000000000000010C /* Info.plist */,
+				10000000000000000000010D /* ZambiaJobAlertsIOS.entitlements */,
+				10000000000000000000010E /* Assets.xcassets */,
+				100000000000000000000110 /* GoogleService-Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		DEA97DB7836A0CE09851617E /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				AC6B25E6AB13F2805167F2B8 /* Pods-ZambiaJobAlertsIOS.debug.xcconfig */,
+				F4966753D02ECF80107C5E27 /* Pods-ZambiaJobAlertsIOS.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		DECE67FF024DFF097DFB9D2C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F3CB6D0833AC40DABF70ED74 /* Pods_ZambiaJobAlertsIOS.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		100000000000000000000040 /* ZambiaJobAlertsIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 100000000000000000000070 /* Build configuration list for PBXNativeTarget "ZambiaJobAlertsIOS" */;
+			buildPhases = (
+				C2F945BCA6110CF0FC27DDE7 /* [CP] Check Pods Manifest.lock */,
+				B4A2D5E67F90123456789ABC /* Build Pods For Direct Project Archive */,
+				100000000000000000000023 /* Embed KMP Framework */,
+				100000000000000000000021 /* Sources */,
+				100000000000000000000020 /* Frameworks */,
+				100000000000000000000022 /* Resources */,
+				10DE1DC71D5C4BD396FCB64D /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ZambiaJobAlertsIOS;
+			productName = ZambiaJobAlertsIOS;
+			productReference = 100000000000000000000010 /* ZambiaJobAlertsIOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		100000000000000000000050 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					100000000000000000000040 = {
+						CreatedOnToolsVersion = 26.4;
+					};
+				};
+			};
+			buildConfigurationList = 100000000000000000000060 /* Build configuration list for PBXProject "ZambiaJobAlerts" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 100000000000000000000030;
+			productRefGroup = 100000000000000000000032 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				100000000000000000000040 /* ZambiaJobAlertsIOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		100000000000000000000022 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10000000000000000000000C /* Assets.xcassets in Resources */,
+				10000000000000000000000E /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		100000000000000000000023 /* Embed KMP Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed KMP Framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+		};
+		10DE1DC71D5C4BD396FCB64D /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ZambiaJobAlertsIOS/Pods-ZambiaJobAlertsIOS-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ZambiaJobAlertsIOS/Pods-ZambiaJobAlertsIOS-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ZambiaJobAlertsIOS/Pods-ZambiaJobAlertsIOS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B4A2D5E67F90123456789ABC /* Build Pods For Direct Project Archive */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Pods For Direct Project Archive";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif [ -z \"${PODS_ROOT}\" ] || [ ! -d \"${PODS_ROOT}/Pods.xcodeproj\" ]; then\n  exit 0\nfi\nif [ -d \"${CONFIGURATION_BUILD_DIR}/PromisesObjC/FBLPromises.framework\" ]; then\n  exit 0\nfi\necho \"Building CocoaPods frameworks for direct .xcodeproj archive\"\nxcodebuild -project \"${PODS_ROOT}/Pods.xcodeproj\" -scheme \"Pods-ZambiaJobAlertsIOS\" -configuration \"${CONFIGURATION}\" -sdk \"${SDK_NAME}\" BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" ONLY_ACTIVE_ARCH=\"${ONLY_ACTIVE_ARCH}\" ARCHS=\"${ARCHS}\" build\n";
+			showEnvVarsInLog = 0;
+		};
+		C2F945BCA6110CF0FC27DDE7 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ZambiaJobAlertsIOS-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		100000000000000000000021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				100000000000000000000001 /* ZambiaJobAlertsIOSApp.swift in Sources */,
+				100000000000000000000002 /* AppDelegate.swift in Sources */,
+				100000000000000000000003 /* RootView.swift in Sources */,
+				100000000000000000000004 /* AppLaunchStore.swift in Sources */,
+				100000000000000000000005 /* KMPBridge.swift in Sources */,
+				100000000000000000000006 /* JobModels.swift in Sources */,
+				100000000000000000000007 /* JobsStore.swift in Sources */,
+				100000000000000000000008 /* AdBootstrap.swift in Sources */,
+				100000000000000000000009 /* AdMobBannerView.swift in Sources */,
+				10000000000000000000000A /* InterstitialAdManager.swift in Sources */,
+				10000000000000000000000B /* AppOpenAdManager.swift in Sources */,
+				10000000000000000000000D /* NativeAdCardView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		100000000000000000000061 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		100000000000000000000062 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		100000000000000000000071 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AC6B25E6AB13F2805167F2B8 /* Pods-ZambiaJobAlertsIOS.debug.xcconfig */;
+			buildSettings = {
+				APS_ENVIRONMENT = development;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ZambiaJobAlertsIOS/Resources/ZambiaJobAlertsIOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.1.9;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 6QYW7YGATJ;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ZambiaJobAlertsIOS/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.9;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					ZambiaJobAlertsShared,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alphil.networks.Zambia-Job-Alerts";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		100000000000000000000072 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F4966753D02ECF80107C5E27 /* Pods-ZambiaJobAlertsIOS.release.xcconfig */;
+			buildSettings = {
+				APS_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ZambiaJobAlertsIOS/Resources/ZambiaJobAlertsIOS.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2.1.9;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 6QYW7YGATJ;
+				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ZambiaJobAlertsIOS/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.9;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					ZambiaJobAlertsShared,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alphil.networks.Zambia-Job-Alerts";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		100000000000000000000060 /* Build configuration list for PBXProject "ZambiaJobAlerts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000061 /* Debug */,
+				100000000000000000000062 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		100000000000000000000070 /* Build configuration list for PBXNativeTarget "ZambiaJobAlertsIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				100000000000000000000071 /* Debug */,
+				100000000000000000000072 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 100000000000000000000050 /* Project object */;
+}

@@ -1,8 +1,28 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
     id("com.google.gms.google-services")
-    id("com.google.devtools.ksp") version "2.3.6" apply false
 }
+
+val releaseStoreFilePath = providers.gradleProperty("RELEASE_STORE_FILE")
+    .orElse(providers.environmentVariable("RELEASE_STORE_FILE"))
+    .orNull
+val releaseStorePassword = providers.gradleProperty("RELEASE_STORE_PASSWORD")
+    .orElse(providers.environmentVariable("RELEASE_STORE_PASSWORD"))
+    .orNull
+val releaseKeyAlias = providers.gradleProperty("RELEASE_KEY_ALIAS")
+    .orElse(providers.environmentVariable("RELEASE_KEY_ALIAS"))
+    .orNull
+val releaseKeyPassword = providers.gradleProperty("RELEASE_KEY_PASSWORD")
+    .orElse(providers.environmentVariable("RELEASE_KEY_PASSWORD"))
+    .orNull
+val hasReleaseSigning = listOf(
+    releaseStoreFilePath,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
 
 android {
     namespace = "com.solutions.alphil.zambiajobalerts"
@@ -12,15 +32,29 @@ android {
         applicationId = "com.solutions.alphil.zambiajobalerts"
         minSdk = 28
         targetSdk = 37
-        versionCode = 25
-        versionName = "1.2.12.25"
+        versionCode = 26
+        versionName = "2.3.13.26"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFilePath!!)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -32,21 +66,31 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
+        compose = true
         viewBinding = true
     }
 }
 
 dependencies {
 
+    implementation(project(":shared"))
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.foundation)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.runtime.livedata)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.tooling.preview)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.process)
     implementation(libs.navigation.fragment)
+    implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui)
     implementation(libs.documentfile)
+    implementation(libs.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -82,5 +126,5 @@ dependencies {
     // Room
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
 }

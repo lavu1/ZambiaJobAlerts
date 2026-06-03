@@ -42,7 +42,7 @@
     <style name="BlackTextSpinner" parent="Widget.AppCompat.Spinner">
         <item name="android:textColor">#000000</item>
     </style>
-    <style name="Theme.ZambiaJobAlerts" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.ZambiaJobAlerts" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color (Navy). -->
         <item name="colorPrimary">#001F3F</item>
         <item name="colorPrimaryVariant">#000080</item>
@@ -57,10 +57,12 @@
         <item name="colorOnSurface">#001F3F</item> <!-- Text on surfaces. -->
         <!-- Status bar color. -->
         <item name="android:statusBarColor">#000080</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.ZambiaJobAlerts.NoActionBar">
+    <style name="Theme.ZambiaJobAlerts.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

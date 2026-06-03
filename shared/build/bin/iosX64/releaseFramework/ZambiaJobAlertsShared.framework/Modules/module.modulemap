@@ -1,0 +1,8 @@
+framework module "ZambiaJobAlertsShared" {
+    umbrella header "ZambiaJobAlertsShared.h"
+
+    export *
+    module * { export * }
+
+    use Foundation
+}
