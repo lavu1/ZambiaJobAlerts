@@ -1,0 +1,76 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "bfdfe7dc352907fc980b868725387e985693b5eeefbebde530bb2b752cb31c25"
+    }
+  ],
+  "containerPath" : "/Users/lavumweemba/AndroidStudioProjects/ZambiaJobAlerts/iosApp/Pods/Pods.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "undefined_arch",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : true,
+      "hostTargetedPlatform" : null,
+      "platform" : "iphoneos",
+      "sdk" : "iphoneos26.4",
+      "sdkVariant" : "iphoneos",
+      "supportedArchitectures" : [
+        "armv4t",
+        "armv5",
+        "armv6",
+        "armv7",
+        "armv7f",
+        "armv7s",
+        "armv7k",
+        "arm64",
+        "arm64e"
+      ],
+      "targetArchitecture" : "undefined_arch"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "",
+      "buildProductsPath" : "",
+      "derivedDataPath" : "/Users/lavumweemba/Library/Developer/Xcode/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/lavumweemba/Library/Developer/Xcode/DerivedData/Pods-cdivkajvyroykkgeacmirbyuqxsj/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/lavumweemba/Library/Developer/Xcode/DerivedData/Pods-cdivkajvyroykkgeacmirbyuqxsj/Index.noindex/PrecompiledHeaders",
+      "pchPath" : ""
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+          "ARCHS" : "arm64",
+          "BUILD_DIR" : "/Users/lavumweemba/Library/Developer/Xcode/DerivedData/ZambiaJobAlerts-cekfbudgxwcbiwfvopydfbomtwrq/Build/Intermediates.noindex/ArchiveIntermediates/ZambiaJobAlertsIOS/BuildProductsPath",
+          "BUILD_ROOT" : "/Users/lavumweemba/Library/Developer/Xcode/DerivedData/ZambiaJobAlerts-cekfbudgxwcbiwfvopydfbomtwrq/Build/Intermediates.noindex/ArchiveIntermediates/ZambiaJobAlertsIOS/BuildProductsPath",
+          "ONLY_ACTIVE_ARCH" : "NO",
+          "SDKROOT" : "iphoneos26.4",
+          "TOOLCHAINS" : "com.apple.dt.toolchain.XcodeDefault"
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES"
+        }
+      },
+      "toolchainOverride" : "com.apple.dt.toolchain.XcodeDefault"
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

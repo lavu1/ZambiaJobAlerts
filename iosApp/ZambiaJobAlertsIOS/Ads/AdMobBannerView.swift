@@ -7,10 +7,12 @@ import GoogleMobileAds
 struct AdMobBannerView: UIViewRepresentable {
     let adUnitID: String
     let usesAdaptiveSizing: Bool
+    let collapsiblePlacement: String?
 
-    init(adUnitID: String, usesAdaptiveSizing: Bool = false) {
+    init(adUnitID: String, usesAdaptiveSizing: Bool = false, collapsiblePlacement: String? = nil) {
         self.adUnitID = adUnitID
         self.usesAdaptiveSizing = usesAdaptiveSizing
+        self.collapsiblePlacement = collapsiblePlacement
     }
 
     func makeUIView(context: Context) -> BannerView {
@@ -20,7 +22,7 @@ struct AdMobBannerView: UIViewRepresentable {
         let banner = BannerView(adSize: adSize)
         banner.adUnitID = adUnitID
         banner.rootViewController = UIApplication.shared.firstRootViewController
-        banner.load(Request())
+        banner.load(adRequest())
         return banner
     }
 
@@ -30,15 +32,27 @@ struct AdMobBannerView: UIViewRepresentable {
         let width = max(uiView.bounds.width, UIScreen.main.bounds.width)
         uiView.adSize = largeAnchoredAdaptiveBanner(width: width)
     }
+
+    private func adRequest() -> Request {
+        let request = Request()
+        if let collapsiblePlacement {
+            let extras = Extras()
+            extras.additionalParameters = ["collapsible": collapsiblePlacement]
+            request.register(extras)
+        }
+        return request
+    }
 }
 #else
 struct AdMobBannerView: View {
     let adUnitID: String
     let usesAdaptiveSizing: Bool
+    let collapsiblePlacement: String?
 
-    init(adUnitID: String, usesAdaptiveSizing: Bool = false) {
+    init(adUnitID: String, usesAdaptiveSizing: Bool = false, collapsiblePlacement: String? = nil) {
         self.adUnitID = adUnitID
         self.usesAdaptiveSizing = usesAdaptiveSizing
+        self.collapsiblePlacement = collapsiblePlacement
     }
 
     var body: some View {

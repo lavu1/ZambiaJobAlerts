@@ -3,6 +3,9 @@ import StoreKit
 import UIKit
 import UserNotifications
 
+private let nativeAdInterval = 3
+private let bottomBannerHeight: CGFloat = 60
+
 struct RootView: View {
     @EnvironmentObject private var launchStore: AppLaunchStore
     @EnvironmentObject private var jobsStore: JobsStore
@@ -39,6 +42,7 @@ struct RootView: View {
                 NavigationView {
                     jobsList
                         .navigationTitle("Zambia Job Alerts")
+                        .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
                             ToolbarItemGroup(placement: .navigationBarTrailing) {
                                 Button {
@@ -192,69 +196,78 @@ struct RootView: View {
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List {
-                    ForEach(Array(filteredJobs.enumerated()), id: \.element.id) { index, job in
-                        JobListItemView(
-                            job: job,
-                            isSaved: savedJobsStore.isSaved(job),
-                            onDetails: {
-                                Task {
-                                    await open(job)
-                                }
-                            },
-                            onGenerate: { type in
-                                generatorSeed = DocumentGeneratorSeed(type: type, job: job)
-                            },
-                            onToggleSave: {
-                                _ = savedJobsStore.toggle(job)
-                            }
-                        )
-
-                        if (index + 1).isMultiple(of: 4) {
-                            NativeAdCardView(slot: (index + 1) / 4)
-                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        }
-                    }
-
-                    if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        if jobsStore.hasMore {
-                            Button {
-                                Task {
-                                    await jobsStore.loadMore()
-                                }
-                            } label: {
-                                HStack {
-                                    Spacer()
-                                    if jobsStore.isLoadingMore {
-                                        ProgressView()
-                                    } else {
-                                        Label("Load More Jobs", systemImage: "arrow.down.circle")
+                ScrollViewReader { scrollProxy in
+                    List {
+                        ForEach(Array(filteredJobs.enumerated()), id: \.element.id) { index, job in
+                            JobListItemView(
+                                job: job,
+                                isSaved: savedJobsStore.isSaved(job),
+                                onDetails: {
+                                    Task {
+                                        await open(job)
                                     }
-                                    Spacer()
+                                },
+                                onGenerate: { type in
+                                    generatorSeed = DocumentGeneratorSeed(type: type, job: job)
+                                },
+                                onToggleSave: {
+                                    _ = savedJobsStore.toggle(job)
                                 }
+                            )
+                            .id(job.id)
+
+                            if (index + 1).isMultiple(of: nativeAdInterval) {
+                                NativeAdCardView(slot: (index + 1) / nativeAdInterval)
+                                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             }
-                            .disabled(jobsStore.isLoadingMore)
-                        } else if !jobsStore.jobs.isEmpty {
-                            Text("All available loaded jobs are showing.")
+                        }
+
+                        if let error = jobsStore.error {
+                            Text(error)
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
                                 .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.vertical, 8)
                         }
+
+                        if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            if jobsStore.hasMore {
+                                Button {
+                                    Task {
+                                        await loadMoreAndReveal(scrollProxy)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Spacer()
+                                        if jobsStore.isLoadingMore {
+                                            ProgressView()
+                                        } else {
+                                            Label("Load More Jobs", systemImage: "arrow.down.circle")
+                                        }
+                                        Spacer()
+                                    }
+                                }
+                                .disabled(jobsStore.isLoadingMore)
+                            } else if !jobsStore.jobs.isEmpty {
+                                Text("All available loaded jobs are showing.")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                            }
+                        }
+
+                        BottomBannerAdView()
+                            .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                     }
-                }
-                .refreshable {
-                    await jobsStore.reload()
+                    .refreshable {
+                        await jobsStore.reload()
+                    }
                 }
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             AdMobBannerView(adUnitID: AdUnitIDs.banner)
-                .frame(height: 60)
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemBackground))
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
                 .frame(height: 60)
                 .frame(maxWidth: .infinity)
                 .background(Color(.systemBackground))
@@ -271,6 +284,14 @@ struct RootView: View {
         selectedJob = job
     }
 
+    @MainActor
+    private func loadMoreAndReveal(_ scrollProxy: ScrollViewProxy) async {
+        guard let firstNewJob = await jobsStore.loadMore() else { return }
+        withAnimation {
+            scrollProxy.scrollTo(firstNewJob.id, anchor: .top)
+        }
+    }
+
     private func handle(_ destination: AppDestination) {
         switch destination {
         case .home:
@@ -284,6 +305,16 @@ struct RootView: View {
                 }
             }
         }
+    }
+}
+
+private struct BottomBannerAdView: View {
+    var body: some View {
+        AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
+        .frame(height: bottomBannerHeight)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemBackground))
+        .clipped()
     }
 }
 
@@ -381,6 +412,9 @@ private struct JobListItemView: View {
             }
         }
         .padding(.vertical, 6)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onDetails)
+        .accessibilityAddTraits(.isButton)
         .sheet(item: $shareItem) { item in
             ShareSheet(items: item.items)
         }
@@ -465,16 +499,6 @@ private struct JobDetailView: View {
                     .buttonStyle(.bordered)
 
                     NativeAdCardView(slot: 60)
-
-                    if let webURL = job.webURL {
-                        Link(destination: webURL) {
-                            Label("Open on Website", systemImage: "safari")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
-                        .frame(height: 60)
                 }
                 .padding()
             }
@@ -484,6 +508,9 @@ private struct JobDetailView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                 }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                BottomBannerAdView()
             }
         }
         .navigationViewStyle(.stack)
@@ -531,7 +558,7 @@ private struct SavedJobsView: View {
                             }
                         }
 
-                        if (index + 1).isMultiple(of: 3) {
+                        if (index + 1).isMultiple(of: nativeAdInterval) {
                             NativeAdCardView(slot: 220 + index)
                                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         }
@@ -539,6 +566,7 @@ private struct SavedJobsView: View {
                 }
             }
             .navigationTitle("Saved Jobs")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: onSearch) {
@@ -547,11 +575,8 @@ private struct SavedJobsView: View {
                     .accessibilityLabel("Search jobs")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
-                    .frame(height: 60)
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.systemBackground))
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                BottomBannerAdView()
             }
         }
         .navigationViewStyle(.stack)
@@ -787,13 +812,14 @@ private struct ServicesView: View {
                     }
                     .padding(.vertical, 4)
 
-                    if (index + 1).isMultiple(of: 3) {
+                    if (index + 1).isMultiple(of: nativeAdInterval) {
                         NativeAdCardView(slot: 100 + index)
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
                 }
             }
             .navigationTitle("Services")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: onSearch) {
@@ -802,11 +828,8 @@ private struct ServicesView: View {
                     .accessibilityLabel("Search jobs")
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
-                    .frame(height: 60)
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.systemBackground))
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                BottomBannerAdView()
             }
         }
         .navigationViewStyle(.stack)
@@ -834,9 +857,17 @@ private struct SettingsView: View {
                     } label: {
                         Label("Share App", systemImage: "square.and.arrow.up")
                     }
-
-                    Link(destination: URL(string: "https://zambiajobalerts.com")!) {
-                        Label("Open Website", systemImage: "safari")
+                }
+                Section("Information") {
+                    NavigationLink {
+                        AboutUsView()
+                    } label: {
+                        Label("About Us", systemImage: "info.circle")
+                    }
+                    NavigationLink {
+                        TermsConditionsView()
+                    } label: {
+                        Label("Terms & Conditions", systemImage: "doc.text")
                     }
                 }
                 Section {
@@ -844,6 +875,7 @@ private struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: onSearch) {
@@ -852,17 +884,14 @@ private struct SettingsView: View {
                     .accessibilityLabel("Search jobs")
                 }
             }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                BottomBannerAdView()
+            }
         }
         .sheet(item: $shareItem) { item in
             ShareSheet(items: item.items)
         }
         .navigationViewStyle(.stack)
-        .safeAreaInset(edge: .bottom) {
-            AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
-                .frame(height: 60)
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemBackground))
-        }
     }
 
     private var shareAppText: String {
@@ -882,6 +911,153 @@ private struct SettingsView: View {
         }
     }
 }
+
+private struct AboutUsView: View {
+    var body: some View {
+        List {
+            ForEach(Array(aboutUsItems.enumerated()), id: \.element.id) { index, item in
+                InfoContentRow(item: item)
+
+                if (index + 1).isMultiple(of: nativeAdInterval) {
+                    NativeAdCardView(slot: 610 + index)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                }
+            }
+        }
+        .navigationTitle("About Us")
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomBannerAdView()
+        }
+    }
+}
+
+private struct TermsConditionsView: View {
+    var body: some View {
+        List {
+            ForEach(Array(termsSections.enumerated()), id: \.element.id) { index, section in
+                InfoContentRow(item: section)
+
+                if (index + 1).isMultiple(of: nativeAdInterval) {
+                    NativeAdCardView(slot: 650 + index)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                }
+            }
+        }
+        .navigationTitle("Terms & Conditions")
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomBannerAdView()
+        }
+    }
+}
+
+private struct InfoContentRow: View {
+    let item: InfoContentItem
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(item.title)
+                .font(.headline)
+            Text(item.body)
+                .font(.body)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 6)
+    }
+}
+
+private struct InfoContentItem: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let body: String
+}
+
+private let aboutUsItems: [InfoContentItem] = [
+    InfoContentItem(
+        id: "expert_engineers",
+        title: "Expert Support",
+        body: "Our team provides career guidance, resume writing, and interview coaching to help job seekers stand out."
+    ),
+    InfoContentItem(
+        id: "experience_skills",
+        title: "Experience Skills",
+        body: "We understand the job market and help candidates navigate applications, interviews, and hiring requirements."
+    ),
+    InfoContentItem(
+        id: "low_cost",
+        title: "Low Cost",
+        body: "We keep job placement and career support affordable for job seekers and practical for employers."
+    ),
+    InfoContentItem(
+        id: "verified_jobs",
+        title: "Reliable & Verified Job Listings",
+        body: "Job posts are checked so job seekers can focus on genuine opportunities across Zambia."
+    ),
+    InfoContentItem(
+        id: "transparent_work",
+        title: "Trusted Work And Transparent",
+        body: "We work with transparency and integrity in job search, hiring support, and career services."
+    ),
+    InfoContentItem(
+        id: "success_rate",
+        title: "High Success Rate",
+        body: "Many job seekers use Zambia Job Alerts as a trusted partner for career growth and daily opportunities."
+    )
+]
+
+private let termsSections: [InfoContentItem] = [
+    InfoContentItem(
+        id: "welcome",
+        title: "Welcome",
+        body: "By using Zambia Job Alerts, you agree to these terms and conditions. If you disagree with any part of these terms, please do not use the app."
+    ),
+    InfoContentItem(
+        id: "information",
+        title: "1. Information On This App",
+        body: "The app content is provided for general information and use. It may change without notice. We do not guarantee that all information is complete, accurate, timely, or suitable for every purpose. You are responsible for checking that any opportunity, service, or information meets your needs."
+    ),
+    InfoContentItem(
+        id: "links",
+        title: "2. Links",
+        body: "The app may include links to other websites or external services. Those links are provided for convenience. Zambia Job Alerts is not responsible for the content, availability, or accuracy of external sites."
+    ),
+    InfoContentItem(
+        id: "content_rights",
+        title: "3. Content Rights",
+        body: "The app contains material owned by or licensed to Zambia Job Alerts, including design, layout, appearance, and graphics. Reproduction is prohibited unless permitted by the copyright notice or by written permission."
+    ),
+    InfoContentItem(
+        id: "copyright",
+        title: "4. Copyright Notice",
+        body: "This app and its content are copyright of Zambia Job Alerts. All rights are reserved. You may not redistribute, reproduce, commercially exploit, transmit, or store app content in another system without written permission."
+    ),
+    InfoContentItem(
+        id: "disclaimer",
+        title: "5. Disclaimer",
+        body: "Information is provided by Zambia Job Alerts and app users. We make no warranties about completeness, accuracy, reliability, suitability, or availability. Any reliance on the information is at your own risk."
+    ),
+    InfoContentItem(
+        id: "law",
+        title: "6. Law & Jurisdiction",
+        body: "Recruiters, job seekers, and other users must comply with applicable employment, data, and equality laws. Use of the app and related disputes are subject to the laws of Zambia."
+    ),
+    InfoContentItem(
+        id: "job_seekers",
+        title: "7. Job Seekers",
+        body: "Our jobs board operates as a venue only and does not generally introduce or supply candidates to recruiters. Job seekers should verify opportunities and are responsible for the accuracy and legality of information they submit."
+    ),
+    InfoContentItem(
+        id: "employers",
+        title: "8. Employers & Recruiters",
+        body: "Employers and recruiters are responsible for their advertisements and for dealings with candidates who respond. We do not guarantee responses or candidate suitability, and discriminatory advertisements may be amended or removed."
+    ),
+    InfoContentItem(
+        id: "communication",
+        title: "9. Communication",
+        body: "Posts and messages from users represent the views of the person posting. Communication through the app must be lawful. We may remove content that is offensive, misleading, or violates these terms. For concerns, contact support@zambiajobalerts.com."
+    )
+]
 
 private struct DocumentGeneratorView: View {
     let seed: DocumentGeneratorSeed
@@ -1067,6 +1243,7 @@ private struct DocumentGeneratorView: View {
             }
         }
         .navigationTitle("Generate")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: onSearch) {
@@ -1078,11 +1255,8 @@ private struct DocumentGeneratorView: View {
         .sheet(item: $shareItem) { item in
             ShareSheet(items: item.items)
         }
-        .safeAreaInset(edge: .bottom) {
-            AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
-                .frame(height: 60)
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemBackground))
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomBannerAdView()
         }
     }
 
@@ -1243,7 +1417,7 @@ private struct DocumentLibraryView: View {
                     }
                     .padding(.vertical, 4)
 
-                    if (index + 1).isMultiple(of: 3) {
+                    if (index + 1).isMultiple(of: nativeAdInterval) {
                         NativeAdCardView(slot: 330 + index)
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
@@ -1251,6 +1425,7 @@ private struct DocumentLibraryView: View {
             }
         }
         .navigationTitle("Documents")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: onSearch) {
@@ -1262,11 +1437,8 @@ private struct DocumentLibraryView: View {
         .sheet(item: $shareItem) { item in
             ShareSheet(items: item.items)
         }
-        .safeAreaInset(edge: .bottom) {
-            AdMobBannerView(adUnitID: AdUnitIDs.fixedBanner)
-                .frame(height: 60)
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemBackground))
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomBannerAdView()
         }
     }
 }
@@ -1301,14 +1473,20 @@ private struct GlobalJobSearchView: View {
                     Text("No jobs found.")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(filteredJobs) { job in
+                    ForEach(Array(filteredJobs.enumerated()), id: \.element.id) { index, job in
                         Button {
                             dismiss()
                             openJob(job)
                         } label: {
                             JobRow(job: job)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .buttonStyle(.plain)
+
+                        if (index + 1).isMultiple(of: nativeAdInterval) {
+                            NativeAdCardView(slot: 720 + index)
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        }
                     }
                 }
 
@@ -1330,8 +1508,12 @@ private struct GlobalJobSearchView: View {
                     }
                     .disabled(jobsStore.isLoadingMore)
                 }
+
+                BottomBannerAdView()
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
             }
             .navigationTitle("Search Jobs")
+            .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $query, prompt: "Search jobs")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

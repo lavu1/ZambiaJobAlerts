@@ -34,21 +34,36 @@ final class JobsStore: ObservableObject {
         }
     }
 
-    func loadMore() async {
-        guard !isLoading, !isLoadingMore, hasMore else { return }
+    @discardableResult
+    func loadMore() async -> JobSummary? {
+        guard !isLoading, !isLoadingMore, hasMore else { return nil }
 
         isLoadingMore = true
         error = nil
         defer { isLoadingMore = false }
 
-        let nextPage = max(currentPage + 1, 1)
+        var nextPage = max(currentPage + 1, 1)
+        var attempts = 0
         do {
-            let result = try await fetchJobs(page: nextPage)
-            appendUnique(result.jobs)
-            currentPage = nextPage
-            hasMore = result.hasMore
+            while attempts < 4, hasMore {
+                attempts += 1
+                let result = try await fetchJobs(page: nextPage)
+                let firstNewJob = appendUnique(result.jobs)
+                currentPage = nextPage
+                hasMore = result.hasMore
+
+                if let firstNewJob {
+                    return firstNewJob
+                }
+                if result.jobs.isEmpty {
+                    return nil
+                }
+                nextPage += 1
+            }
+            return nil
         } catch {
             self.error = jobsConnectionMessage
+            return nil
         }
     }
 
@@ -134,12 +149,17 @@ final class JobsStore: ObservableObject {
         return (data, http)
     }
 
-    private func appendUnique(_ newJobs: [JobSummary]) {
+    private func appendUnique(_ newJobs: [JobSummary]) -> JobSummary? {
         var seen = Set(jobs.map(\.id))
+        var firstNewJob: JobSummary?
         for job in newJobs where !seen.contains(job.id) {
+            if firstNewJob == nil {
+                firstNewJob = job
+            }
             jobs.append(job)
             seen.insert(job.id)
         }
+        return firstNewJob
     }
 
     private func looksLikeHtmlChallenge(_ data: Data) -> Bool {

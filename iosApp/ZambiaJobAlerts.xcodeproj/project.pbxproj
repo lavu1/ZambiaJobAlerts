@@ -242,9 +242,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ZambiaJobAlertsIOS/Pods-ZambiaJobAlertsIOS-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ZambiaJobAlertsIOS/Pods-ZambiaJobAlertsIOS-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -436,7 +440,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = ZambiaJobAlertsIOS/Resources/ZambiaJobAlertsIOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.1.9;
+				CURRENT_PROJECT_VERSION = 2.2.13;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 6QYW7YGATJ;
 				ENABLE_PREVIEWS = YES;
@@ -448,7 +452,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 2.13;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
@@ -472,7 +476,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = ZambiaJobAlertsIOS/Resources/ZambiaJobAlertsIOS.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2.1.9;
+				CURRENT_PROJECT_VERSION = 2.2.13;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 6QYW7YGATJ;
 				ENABLE_PREVIEWS = YES;
@@ -484,7 +488,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.9;
+				MARKETING_VERSION = 2.13;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
